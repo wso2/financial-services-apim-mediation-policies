@@ -23,20 +23,19 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.base.ServerConfiguration;
-import org.wso2.financial.services.accelerator.common.config.FinancialServicesConfigParser;
-import org.wso2.financial.services.accelerator.common.constant.FinancialServicesConstants;
-import org.wso2.financial.services.accelerator.common.exception.FinancialServicesException;
-import org.wso2.financial.services.accelerator.common.util.HTTPClientUtils;
 import org.wso2.financial.services.apim.mediation.policies.consent.enforcement.constants.ConsentEnforcementConstants;
 
 import java.io.FileInputStream;
@@ -61,7 +60,6 @@ import java.util.Map;
 public class ConsentEnforcementUtils {
 
     private static final Log log = LogFactory.getLog(ConsentEnforcementUtils.class);
-    private static final Map<String, Object> configs = FinancialServicesConfigParser.getInstance().getConfiguration();
     private static final ServerConfiguration serverConfigs = ServerConfiguration.getInstance();
     private static final APIManagerConfigurationService configService = ServiceReferenceHolder.getInstance()
             .getAPIManagerConfigurationService();
@@ -93,12 +91,14 @@ public class ConsentEnforcementUtils {
     }
 
     /**
-     * Method to extract consent ID from the JWT token in the request headers.
+     * Method to extract the consent ID from the JWT token present in the request headers.
      *
      * @param headers Transport headers from the Axis2 message context
-     * @return Extracted consent ID
+     * @param consentIdClaimName Name of the claim that contains the consent ID
+     * @return Consent ID if present in the JWT token, null otherwise
+     * @throws UnsupportedEncodingException When encoding is not UTF-8
      */
-    public static String extractConsentIdFromJwtToken(Map<String, Object> headers)
+    public static String extractConsentIdFromJwtToken(Map<String, Object> headers, String consentIdClaimName)
             throws UnsupportedEncodingException {
 
         String authHeader = (String) headers.get(ConsentEnforcementConstants.AUTH_HEADER);
@@ -108,8 +108,6 @@ public class ConsentEnforcementUtils {
             if (!authHeader.contains(ConsentEnforcementConstants.BASIC_TAG)) {
                 authHeader = authHeader.replace(ConsentEnforcementConstants.BEARER_TAG, "");
                 JSONObject jwtClaims = decodeBase64(authHeader.split("\\.")[1]);
-
-                String consentIdClaimName = (String) configs.get(FinancialServicesConstants.CONSENT_ID_CLAIM_NAME);
 
                 if (!jwtClaims.isNull(consentIdClaimName) && !jwtClaims.getString(consentIdClaimName).isEmpty()) {
                     consentIdClaim = jwtClaims.getString(consentIdClaimName);
@@ -165,10 +163,10 @@ public class ConsentEnforcementUtils {
      * @return Response as a String
      * @throws IOException When failed to invoke the validation endpoint or failed to parse the response.
      */
-    public static String invokeConsentValidationService(String enforcementJWTPayload) throws IOException,
-            FinancialServicesException {
+    public static String invokeConsentValidationService(String enforcementJWTPayload, String consentValidationEndpoint)
+            throws IOException, APIManagementException {
 
-        HttpPost httpPost = new HttpPost(getValidationEndpoint());
+        HttpPost httpPost = new HttpPost();
         StringEntity params;
         params = new StringEntity(enforcementJWTPayload);
         httpPost.setEntity(params);
@@ -180,23 +178,11 @@ public class ConsentEnforcementUtils {
                 .getFirstProperty(ConsentEnforcementConstants.API_KEY_VALIDATOR_PASSWORD);
 
         httpPost.setHeader(ConsentEnforcementConstants.AUTH_HEADER, getBasicAuthHeader(userName, password));
-        CloseableHttpResponse response = HTTPClientUtils.getHttpsClient().execute(httpPost);
+        HttpClient httpClient = APIUtil.getHttpClient(consentValidationEndpoint);
+        HttpResponse response = httpClient.execute(httpPost);
+
         InputStream in = response.getEntity().getContent();
         return IOUtils.toString(in, String.valueOf(StandardCharsets.UTF_8));
-    }
-
-    private static String getValidationEndpoint() {
-
-        if (consentValidationEndpoint == null) {
-            synchronized (ConsentEnforcementUtils.class) {
-                if (consentValidationEndpoint == null) {
-                    consentValidationEndpoint = (String) configs
-                            .get(FinancialServicesConstants.CONSENT_VALIDATION_ENDPOINT);
-                }
-            }
-        }
-        return consentValidationEndpoint;
-
     }
 
     /**
@@ -275,14 +261,14 @@ public class ConsentEnforcementUtils {
     private static String getKeyStoreLocation() {
 
         return keyStoreLocation == null ? serverConfigs
-                .getFirstProperty(FinancialServicesConstants.KEYSTORE_LOCATION_TAG) : keyStoreLocation;
+                .getFirstProperty(ConsentEnforcementConstants.KEYSTORE_LOCATION_TAG) : keyStoreLocation;
     }
 
     private static char[] getKeyStorePassword() {
 
         if (keyStorePassword == null) {
             keyStorePassword = serverConfigs
-                    .getFirstProperty(FinancialServicesConstants.KEYSTORE_PASSWORD_TAG).toCharArray();
+                    .getFirstProperty(ConsentEnforcementConstants.KEYSTORE_PASSWORD_TAG).toCharArray();
         }
         return Arrays.copyOf(keyStorePassword, keyStorePassword.length);
     }
@@ -290,12 +276,12 @@ public class ConsentEnforcementUtils {
     private static String getKeyAlias() {
 
         return keyAlias == null ? serverConfigs
-                .getFirstProperty(FinancialServicesConstants.SIGNING_ALIAS_TAG) : keyAlias;
+                .getFirstProperty(ConsentEnforcementConstants.SIGNING_ALIAS_TAG) : keyAlias;
     }
 
     private static String getKeyPassword() {
 
         return keyPassword == null ? serverConfigs
-                .getFirstProperty(FinancialServicesConstants.SIGNING_KEY_PASSWORD) : keyPassword;
+                .getFirstProperty(ConsentEnforcementConstants.SIGNING_KEY_PASSWORD) : keyPassword;
     }
 }

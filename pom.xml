@@ -40,6 +40,7 @@
 
     <modules>
         <module>consent-enforcement/consent-enforcement-mediator</module>
+        <module>mtls-enforcement/header-cert-format-validation-mediator</module>
     </modules>
 
     <repositories>
@@ -219,6 +220,11 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>commons-codec</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>${commons-codec.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>io.jsonwebtoken</groupId>
                 <artifactId>jjwt</artifactId>
                 <version>${jjwt.version}</version>
@@ -238,11 +244,6 @@
                         <artifactId>javassist</artifactId>
                     </exclusion>
                 </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.financial.services.accelerator</groupId>
-                <artifactId>org.wso2.financial.services.accelerator.common</artifactId>
-                <version>${fs.accelerator.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -264,7 +265,7 @@
         <!--Base Products related dependencies-->
         <synapse.version>2.1.7-wso2v217</synapse.version>
         <org.wso2.carbon.apimgt.version>9.30.10</org.wso2.carbon.apimgt.version>
-        <fs.accelerator.version>4.0.0-RC1-SNAPSHOT</fs.accelerator.version>
+        <commons-codec.version>1.16.0</commons-codec.version>
         <!--Unit Test related dependencies-->
         <jacoco.version>0.8.6</jacoco.version>
     </properties>

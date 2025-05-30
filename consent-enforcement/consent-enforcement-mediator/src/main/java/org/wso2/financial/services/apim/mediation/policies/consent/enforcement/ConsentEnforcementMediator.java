@@ -27,7 +27,7 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.wso2.financial.services.accelerator.common.exception.FinancialServicesException;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.financial.services.apim.mediation.policies.consent.enforcement.constants.ConsentEnforcementConstants;
 import org.wso2.financial.services.apim.mediation.policies.consent.enforcement.utils.ConsentEnforcementUtils;
 
@@ -43,6 +43,9 @@ public class ConsentEnforcementMediator extends AbstractMediator {
 
     private static final Log log = LogFactory.getLog(ConsentEnforcementMediator.class);
 
+    private String consentIdClaimName;
+    private String consentValidationEndpoint;
+
     @Override
     public boolean mediate(MessageContext messageContext) {
 
@@ -53,7 +56,7 @@ public class ConsentEnforcementMediator extends AbstractMediator {
 
         String extractedConsentId;
         try {
-            extractedConsentId = ConsentEnforcementUtils.extractConsentIdFromJwtToken(headers);
+            extractedConsentId = ConsentEnforcementUtils.extractConsentIdFromJwtToken(headers, consentIdClaimName);
         } catch (UnsupportedEncodingException e) {
             // TODO: handle error properly
             return false;
@@ -89,9 +92,10 @@ public class ConsentEnforcementMediator extends AbstractMediator {
 
         JSONObject jsonResponse;
         try {
-            String response = ConsentEnforcementUtils.invokeConsentValidationService(enforcementJWTPayload);
+            String response = ConsentEnforcementUtils
+                    .invokeConsentValidationService(enforcementJWTPayload, consentValidationEndpoint);
             jsonResponse = new JSONObject(response);
-        } catch (IOException | FinancialServicesException e) {
+        } catch (IOException | APIManagementException e) {
             // TODO: handle error properly
             return false;
         }
@@ -127,4 +131,19 @@ public class ConsentEnforcementMediator extends AbstractMediator {
         return true;
     }
 
+    public String getConsentIdClaimName() {
+        return consentIdClaimName;
+    }
+
+    public void setConsentIdClaimName(String consentIdClaimName) {
+        this.consentIdClaimName = consentIdClaimName;
+    }
+
+    public String getConsentValidationEndpoint() {
+        return consentValidationEndpoint;
+    }
+
+    public void setConsentValidationEndpoint(String consentValidationEndpoint) {
+        this.consentValidationEndpoint = consentValidationEndpoint;
+    }
 }

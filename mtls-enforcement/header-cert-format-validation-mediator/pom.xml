@@ -26,21 +26,17 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <artifactId>consent-enforcement-mediator</artifactId>
-    <name>WSO2 Financial Services APIM Mediation Policies - Consent Enforcement Policy</name>
+    <artifactId>header-cert-format-validation-mediator</artifactId>
+    <name>WSO2 Financial Services APIM Mediation Policies - Header Certificate Format Validation Mediator</name>
 
     <dependencies>
         <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt</artifactId>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.synapse</groupId>
             <artifactId>synapse-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
         </dependency>
     </dependencies>
 
