@@ -24,7 +24,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.synapse.MessageContext;
@@ -34,7 +33,6 @@ import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.financial.services.apim.mediation.policies.consent.enforcement.constants.ConsentEnforcementConstants;
 
@@ -166,7 +164,7 @@ public class ConsentEnforcementUtils {
     public static String invokeConsentValidationService(String enforcementJWTPayload, String consentValidationEndpoint)
             throws IOException, APIManagementException {
 
-        HttpPost httpPost = new HttpPost();
+        HttpPost httpPost = new HttpPost(consentValidationEndpoint);
         StringEntity params;
         params = new StringEntity(enforcementJWTPayload);
         httpPost.setEntity(params);
@@ -178,9 +176,8 @@ public class ConsentEnforcementUtils {
                 .getFirstProperty(ConsentEnforcementConstants.API_KEY_VALIDATOR_PASSWORD);
 
         httpPost.setHeader(ConsentEnforcementConstants.AUTH_HEADER, getBasicAuthHeader(userName, password));
-        HttpClient httpClient = APIUtil.getHttpClient(consentValidationEndpoint);
-        HttpResponse response = httpClient.execute(httpPost);
 
+        HttpResponse response = HttpsClientHolder.getHttpsClient().execute(httpPost);
         InputStream in = response.getEntity().getContent();
         return IOUtils.toString(in, String.valueOf(StandardCharsets.UTF_8));
     }

@@ -76,7 +76,7 @@ public class HeaderCertFormatValidationMediator extends AbstractMediator {
         return isClientCertificateEncoded;
     }
 
-    public void setClientCertificateEncoded(boolean clientCertificateEncoded) {
-        isClientCertificateEncoded = clientCertificateEncoded;
+    public void setIsClientCertificateEncoded(boolean isClientCertificateEncoded) {
+        this.isClientCertificateEncoded = isClientCertificateEncoded;
     }
 }
