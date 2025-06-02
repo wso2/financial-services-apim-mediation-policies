@@ -44,7 +44,7 @@ public class ConsentEnforcementMediator extends AbstractMediator {
     private static final Log log = LogFactory.getLog(ConsentEnforcementMediator.class);
 
     private String consentIdClaimName;
-    private String consentValidationEndpoint;
+    private String identityServerBaseUrl;
 
     @Override
     public boolean mediate(MessageContext messageContext) {
@@ -92,6 +92,8 @@ public class ConsentEnforcementMediator extends AbstractMediator {
 
         JSONObject jsonResponse;
         try {
+            String consentValidationEndpoint = identityServerBaseUrl +
+                    ConsentEnforcementConstants.CONSENT_VALIDATE_ENDPOINT;
             String response = ConsentEnforcementUtils
                     .invokeConsentValidationService(enforcementJWTPayload, consentValidationEndpoint);
             jsonResponse = new JSONObject(response);
@@ -139,11 +141,11 @@ public class ConsentEnforcementMediator extends AbstractMediator {
         this.consentIdClaimName = consentIdClaimName;
     }
 
-    public String getConsentValidationEndpoint() {
-        return consentValidationEndpoint;
+    public String getIdentityServerBaseUrl() {
+        return identityServerBaseUrl;
     }
 
-    public void setConsentValidationEndpoint(String consentValidationEndpoint) {
-        this.consentValidationEndpoint = consentValidationEndpoint;
+    public void setIdentityServerBaseUrl(String identityServerBaseUrl) {
+        this.identityServerBaseUrl = identityServerBaseUrl;
     }
 }

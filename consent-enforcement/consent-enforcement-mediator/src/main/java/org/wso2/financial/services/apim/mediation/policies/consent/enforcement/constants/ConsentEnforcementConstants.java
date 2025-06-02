@@ -35,6 +35,7 @@ public class ConsentEnforcementConstants {
     public static final String IS_VALID = "isValid";
     public static final String MODIFIED_PAYLOAD = "modifiedPayload";
     public static final String CONSENT_INFO = "consentInformation";
+    public static final String CONSENT_VALIDATE_ENDPOINT = "/api/fs/consent/validate/validate";
 
     // Configs
     public static final String KEYSTORE_LOCATION_TAG = "Security.InternalKeyStore.Location";
