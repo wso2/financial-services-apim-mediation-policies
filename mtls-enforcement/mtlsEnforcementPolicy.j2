@@ -17,7 +17,7 @@
  -->
 
 {% if transportCertAsHeaderEnabled %}
-    <class name="org.wso2.financial.services.apim.mediation.policies.mtls.enforcement.HeaderCertFormatValidationMediator">
+    <class name="org.wso2.financial.services.apim.mediation.policies.mtls.enforcement.MTLSHeaderEnforcementMediator">
         <property name="transportCertHeaderName" value="{{transportCertHeaderName}}"/>
         <property name="isClientCertificateEncoded" value="{{isClientCertificateEncoded}}"/>
     </class>

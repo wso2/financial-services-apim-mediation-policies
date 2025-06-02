@@ -40,7 +40,7 @@
 
     <modules>
         <module>consent-enforcement/consent-enforcement-mediator</module>
-        <module>mtls-enforcement/header-cert-format-validation-mediator</module>
+        <module>mtls-enforcement/mtls-header-enforcement-mediator</module>
     </modules>
 
     <repositories>

@@ -29,9 +29,9 @@ import java.security.cert.CertificateException;
 import java.util.Map;
 
 /**
- * Mediator to enforce consent for the request.
+ * Mediator to enforce MTLS as a header in the request.
  */
-public class HeaderCertFormatValidationMediator extends AbstractMediator {
+public class MTLSHeaderEnforcementMediator extends AbstractMediator {
 
     private String transportCertHeaderName;
     private boolean isClientCertificateEncoded;
