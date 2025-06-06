@@ -23,11 +23,8 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
-import org.apache.synapse.commons.json.JsonUtil;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.financial.services.apim.mediation.policies.consent.enforcement.constants.ConsentEnforcementConstants;
 
@@ -52,10 +49,7 @@ public class ConsentEnforcementUtils {
 
     private static final Log log = LogFactory.getLog(ConsentEnforcementUtils.class);
     private static final ServerConfiguration serverConfigs = ServerConfiguration.getInstance();
-    private static final APIManagerConfigurationService configService = ServiceReferenceHolder.getInstance()
-            .getAPIManagerConfigurationService();
 
-    private static volatile String consentValidationEndpoint;
     private static volatile Key key;
     private static String keyStoreLocation;
     private static char[] keyStorePassword;
@@ -89,10 +83,10 @@ public class ConsentEnforcementUtils {
      * @return Consent ID if present in the JWT token, null otherwise
      * @throws UnsupportedEncodingException When encoding is not UTF-8
      */
-    public static String extractConsentIdFromJwtToken(Map<String, Object> headers, String consentIdClaimName)
+    public static String extractConsentIdFromJwtToken(Map<String, String> headers, String consentIdClaimName)
             throws UnsupportedEncodingException {
 
-        String authHeader = (String) headers.get(ConsentEnforcementConstants.AUTH_HEADER);
+        String authHeader = headers.get(ConsentEnforcementConstants.AUTH_HEADER);
         if (authHeader != null && !authHeader.isEmpty() &&
                 isValidJWTToken(authHeader.replace(ConsentEnforcementConstants.BEARER_TAG, ""))) {
             String consentIdClaim = null;
@@ -112,13 +106,13 @@ public class ConsentEnforcementUtils {
     /**
      * Method to create the validation request payload.
      *
-     * @param axis2MessageContext Axis2 message context
+     * @param jsonPayload JSON payload as a string to be included in the request body
      * @param requestHeaders Transport headers from the Axis2 message context
      * @param additionalParams Additional parameters to be included in the request payload
      * @return JSONObject representing the validation request payload
      */
-    public static JSONObject createValidationRequestPayload(org.apache.axis2.context.MessageContext axis2MessageContext,
-                                                            Map<String, Object> requestHeaders,
+    public static JSONObject createValidationRequestPayload(String jsonPayload,
+                                                            Map<String, String> requestHeaders,
                                                             Map<String, Object> additionalParams) throws JSONException {
 
         JSONObject validationRequest = new JSONObject();
@@ -127,7 +121,7 @@ public class ConsentEnforcementUtils {
         requestHeaders.forEach(headers::put);
         validationRequest.put(ConsentEnforcementConstants.HEADERS_TAG, headers);
 
-        JSONObject requestPayload = new JSONObject(JsonUtil.jsonPayloadToString(axis2MessageContext));
+        JSONObject requestPayload = new JSONObject(jsonPayload);
         validationRequest.put(ConsentEnforcementConstants.BODY_TAG, requestPayload);
 
         additionalParams.forEach(validationRequest::put);

@@ -22,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.json.JSONException;
@@ -47,7 +48,7 @@ public class ConsentEnforcementPayloadMediator extends AbstractMediator {
 
         org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext)
                 .getAxis2MessageContext();
-        Map<String, Object> headers = (Map<String, Object>)
+        Map<String, String> headers = (Map<String, String>)
                 axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
 
         String extractedConsentId;
@@ -77,8 +78,9 @@ public class ConsentEnforcementPayloadMediator extends AbstractMediator {
 
         JSONObject validationRequest;
         try {
+            String jsonPayload = JsonUtil.jsonPayloadToString(axis2MessageContext);
             validationRequest = ConsentEnforcementUtils
-                    .createValidationRequestPayload(axis2MessageContext, headers, additionalParams);
+                    .createValidationRequestPayload(jsonPayload, headers, additionalParams);
         } catch (JSONException e) {
             // TODO: handle error properly
             return false;

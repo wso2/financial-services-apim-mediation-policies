@@ -41,10 +41,10 @@ public class MTLSHeaderEnforcementMediator extends AbstractMediator {
 
         org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext)
                 .getAxis2MessageContext();
-        Map<String, Object> headers = (Map<String, Object>)
+        Map<String, String> headers = (Map<String, String>)
                 axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
 
-        String certificateHeaderValue = (String) headers.get(transportCertHeaderName);
+        String certificateHeaderValue = headers.get(transportCertHeaderName);
 
         try {
             Certificate certificate = MTLSEnforcementUtils
