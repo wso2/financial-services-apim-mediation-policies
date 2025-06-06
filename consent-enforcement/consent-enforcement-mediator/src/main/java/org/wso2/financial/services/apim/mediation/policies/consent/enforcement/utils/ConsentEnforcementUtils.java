@@ -20,17 +20,12 @@ package org.wso2.financial.services.apim.mediation.policies.consent.enforcement.
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.base.ServerConfiguration;
@@ -38,7 +33,6 @@ import org.wso2.financial.services.apim.mediation.policies.consent.enforcement.c
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
@@ -48,7 +42,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -155,34 +148,6 @@ public class ConsentEnforcementUtils {
     }
 
     /**
-     * Method to invoke consent validation service when the JWT payload is provided.
-     *
-     * @param enforcementJWTPayload JWT Payload
-     * @return Response as a String
-     * @throws IOException When failed to invoke the validation endpoint or failed to parse the response.
-     */
-    public static String invokeConsentValidationService(String enforcementJWTPayload, String consentValidationEndpoint)
-            throws IOException, APIManagementException {
-
-        HttpPost httpPost = new HttpPost(consentValidationEndpoint);
-        StringEntity params;
-        params = new StringEntity(enforcementJWTPayload);
-        httpPost.setEntity(params);
-        httpPost.setHeader(ConsentEnforcementConstants.CONTENT_TYPE_TAG, ConsentEnforcementConstants.JWT_CONTENT_TYPE);
-
-        String userName = configService.getAPIManagerConfiguration()
-                .getFirstProperty(ConsentEnforcementConstants.API_KEY_VALIDATOR_USERNAME);
-        String password = configService.getAPIManagerConfiguration()
-                .getFirstProperty(ConsentEnforcementConstants.API_KEY_VALIDATOR_PASSWORD);
-
-        httpPost.setHeader(ConsentEnforcementConstants.AUTH_HEADER, getBasicAuthHeader(userName, password));
-
-        HttpResponse response = HttpsClientHolder.getHttpsClient().execute(httpPost);
-        InputStream in = response.getEntity().getContent();
-        return IOUtils.toString(in, String.valueOf(StandardCharsets.UTF_8));
-    }
-
-    /**
      * Method to check whether the given string is a valid JWT token.
      *
      * @param jwtString JWT token string
@@ -239,20 +204,6 @@ public class ConsentEnforcementUtils {
             }
         }
         return key;
-    }
-
-    /**
-     * Method to obtain basic auth header.
-     *
-     * @param username Username of Auth header
-     * @param password Password of Auth header
-     * @return basic auth header
-     */
-    private static String getBasicAuthHeader(String username, String password) {
-
-        byte[] authHeader = Base64.getEncoder().encode((username + ConsentEnforcementConstants.COLON + password)
-                .getBytes(StandardCharsets.UTF_8));
-        return ConsentEnforcementConstants.BASIC_TAG + new String(authHeader, StandardCharsets.UTF_8);
     }
 
     private static String getKeyStoreLocation() {

@@ -22,29 +22,25 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
-import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.financial.services.apim.mediation.policies.consent.enforcement.constants.ConsentEnforcementConstants;
 import org.wso2.financial.services.apim.mediation.policies.consent.enforcement.utils.ConsentEnforcementUtils;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Mediator to enforce consent for the request.
+ * Mediator to generate the payload required to be sent for the consent validation service.
  */
-public class ConsentEnforcementMediator extends AbstractMediator {
+public class ConsentEnforcementPayloadMediator extends AbstractMediator {
 
-    private static final Log log = LogFactory.getLog(ConsentEnforcementMediator.class);
+    private static final Log log = LogFactory.getLog(ConsentEnforcementPayloadMediator.class);
 
     private String consentIdClaimName;
-    private String identityServerBaseUrl;
 
     @Override
     public boolean mediate(MessageContext messageContext) {
@@ -75,9 +71,9 @@ public class ConsentEnforcementMediator extends AbstractMediator {
         additionalParams.put(ConsentEnforcementConstants.RESOURCE_PARAMS_TAG,
                 ConsentEnforcementUtils.getResourceParamMap(messageContext));
          additionalParams.put(ConsentEnforcementConstants.USER_ID_TAG,
-                 messageContext.getProperty(ConsentEnforcementConstants.USER_ID));
+                 "is_admin@wso2.com"/*messageContext.getProperty(ConsentEnforcementConstants.USER_ID)*/);
          additionalParams.put(ConsentEnforcementConstants.CLIENT_ID_TAG,
-                 messageContext.getProperty(ConsentEnforcementConstants.CONSUMER_KEY));
+                 "123"/*messageContext.getProperty(ConsentEnforcementConstants.CONSUMER_KEY)*/);
 
         JSONObject validationRequest;
         try {
@@ -89,47 +85,7 @@ public class ConsentEnforcementMediator extends AbstractMediator {
         }
 
         String enforcementJWTPayload = ConsentEnforcementUtils.generateJWT(validationRequest.toString());
-
-        JSONObject jsonResponse;
-        try {
-            String consentValidationEndpoint = identityServerBaseUrl +
-                    ConsentEnforcementConstants.CONSENT_VALIDATE_ENDPOINT;
-            String response = ConsentEnforcementUtils
-                    .invokeConsentValidationService(enforcementJWTPayload, consentValidationEndpoint);
-            jsonResponse = new JSONObject(response);
-        } catch (IOException | APIManagementException e) {
-            // TODO: handle error properly
-            return false;
-        }
-
-        if (!jsonResponse.has(ConsentEnforcementConstants.IS_VALID)) {
-            // TODO: handle error properly
-            return false;
-        }
-
-        boolean isValid = jsonResponse.getBoolean(ConsentEnforcementConstants.IS_VALID);
-        if (!isValid) {
-            // TODO: handle error properly
-            return false;
-        }
-
-        // Updating the request payload before sending to the backend
-        if (!jsonResponse.isNull(ConsentEnforcementConstants.MODIFIED_PAYLOAD)) {
-            Object modifiedPayloadObj = jsonResponse.get(ConsentEnforcementConstants.MODIFIED_PAYLOAD);
-            if (modifiedPayloadObj != null) {
-                JsonUtil.newJsonPayload(axis2MessageContext, modifiedPayloadObj.toString(), true, true);
-            }
-        }
-
-        // Setting the consent information in the header for the backend to use
-        if (!jsonResponse.isNull(ConsentEnforcementConstants.CONSENT_INFO)) {
-            Object consentInformationObj = jsonResponse.get(ConsentEnforcementConstants.CONSENT_INFO);
-            if (consentInformationObj != null) {
-                headers.put(ConsentEnforcementConstants.INFO_HEADER_TAG, consentInformationObj.toString());
-                axis2MessageContext.setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
-            }
-        }
-
+        messageContext.setProperty("consentEnforcementJwtPayload", enforcementJWTPayload);
         return true;
     }
 
@@ -141,11 +97,4 @@ public class ConsentEnforcementMediator extends AbstractMediator {
         this.consentIdClaimName = consentIdClaimName;
     }
 
-    public String getIdentityServerBaseUrl() {
-        return identityServerBaseUrl;
-    }
-
-    public void setIdentityServerBaseUrl(String identityServerBaseUrl) {
-        this.identityServerBaseUrl = identityServerBaseUrl;
-    }
 }
