@@ -27,25 +27,12 @@
             <!-- Certificate present in request context, proceed normally -->
         </then>
         <else>
-            <!-- TODO: Handle error in a generic way by invoking the fault flow after setting required err properties to context -->
-            <log level="custom">
-                <property name="error" value="Client certificate not found in request context!"/>
-            </log>
-
-            <property name="HTTP_SC" value="401" scope="axis2"/>
-            <payloadFactory media-type="json">
-                <format>
-                    {
-                      "error": {
-                        "code": "401",
-                        "message": "Unauthorized",
-                        "description": "Client certificate is missing"
-                      }
-                    }
-                </format>
-            </payloadFactory>
-            <header name="Content-Type" value="application/json" scope="transport"/>
-            <respond/>
+            <!-- Setting required properties for generating the error response and sending the flow through the fault sequence -->
+            <property name="ERROR_CODE" value="Unauthorized"/>
+            <property name="ERROR_TITLE" value="MTLS Enforcement Error"/>
+            <property name="ERROR_DESCRIPTION" value="Certificate not found in the request"/>
+            <property name="CUSTOM_HTTP_SC" value="401"/>
+            <sequence key="fault"/>
         </else>
     </filter>
 {% endif %}

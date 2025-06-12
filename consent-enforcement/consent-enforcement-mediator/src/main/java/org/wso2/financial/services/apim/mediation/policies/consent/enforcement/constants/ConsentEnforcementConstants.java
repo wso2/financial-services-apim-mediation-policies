@@ -63,4 +63,10 @@ public class ConsentEnforcementConstants {
     public static final String CONSUMER_KEY = "api.ut.consumerKey";
     public static final String USER_ID = "api.ut.userId";
 
+    // Error constants
+    public static final String ERROR_CODE = "ERROR_CODE";
+    public static final String ERROR_TITLE = "ERROR_TITLE";
+    public static final String ERROR_DESCRIPTION = "ERROR_DESCRIPTION";
+    public static final String CUSTOM_HTTP_SC = "CUSTOM_HTTP_SC";
+
 }

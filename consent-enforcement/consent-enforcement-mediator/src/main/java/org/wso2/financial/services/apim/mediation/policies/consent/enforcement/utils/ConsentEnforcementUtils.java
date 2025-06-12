@@ -18,8 +18,13 @@
 
 package org.wso2.financial.services.apim.mediation.policies.consent.enforcement.utils;
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JOSEObjectType;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.crypto.RSASSASigner;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
@@ -36,8 +41,10 @@ import java.security.Key;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.text.ParseException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -129,16 +136,25 @@ public class ConsentEnforcementUtils {
     }
 
     /**
-     * Method to generate JWT.
-     * @param payload Payload to be signed
-     * @return Signed JWT
+     * Method to generate JWT with the given payload.
+     *
+     * @param payload JSON payload as a string to be included in the JWT claims
+     * @return Serialized JWT as a string
+     * @throws ParseException
+     * @throws JOSEException
      */
-    public static String generateJWT(String payload) {
+    public static String generateJWT(String payload) throws ParseException, JOSEException {
 
-        return Jwts.builder()
-                .setPayload(payload)
-                .signWith(SignatureAlgorithm.RS512, getSigningKey())
-                .compact();
+        RSASSASigner signer = new RSASSASigner((PrivateKey) getSigningKey());
+        JWTClaimsSet claimsSet = JWTClaimsSet.parse(payload);
+
+        JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.RS512)
+                .type(JOSEObjectType.JWT)
+                .build();
+
+        SignedJWT signedJWT = new SignedJWT(header, claimsSet);
+        signedJWT.sign(signer);
+        return signedJWT.serialize();
     }
 
     /**
