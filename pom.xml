@@ -41,6 +41,7 @@
     <modules>
         <module>consent-enforcement/consent-enforcement-mediator</module>
         <module>mtls-enforcement/mtls-header-enforcement-mediator</module>
+        <module>dynamic-client-registration/dynamic-client-registration-mediator</module>
     </modules>
 
     <repositories>
@@ -245,6 +246,30 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.com.nimbusds</groupId>
+                <artifactId>nimbus-jose-jwt</artifactId>
+                <version>${org.wso2.orbit.nimbus.version}</version>
+            </dependency>
+            <!-- Test Dependencies -->
+            <dependency>
+                <groupId>org.testng</groupId>
+                <artifactId>testng</artifactId>
+                <version>${org.testng.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>${mockito.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-testng</artifactId>
+                <version>${mockito.testng.version}</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -260,13 +285,18 @@
         <maven.bundle.plugin.version>3.2.0</maven.bundle.plugin.version>
         <maven.surefire.plugin.version>2.22.2</maven.surefire.plugin.version>
         <maven.spotbugsplugin.version>4.8.2.0</maven.spotbugsplugin.version>
+        <com.h3xstream.findsecbugs.version>1.12.0</com.h3xstream.findsecbugs.version>
         <!--Third Party Dependencies-->
         <jjwt.version>0.9.1</jjwt.version>
+        <org.wso2.orbit.nimbus.version>9.37.3.wso2v1</org.wso2.orbit.nimbus.version>
         <!--Base Products related dependencies-->
         <synapse.version>2.1.7-wso2v217</synapse.version>
         <org.wso2.carbon.apimgt.version>9.30.10</org.wso2.carbon.apimgt.version>
         <commons-codec.version>1.16.0</commons-codec.version>
         <!--Unit Test related dependencies-->
         <jacoco.version>0.8.6</jacoco.version>
+        <mockito.version>5.3.1</mockito.version>
+        <org.testng.version>7.10.1</org.testng.version>
+        <mockito.testng.version>0.5.2</mockito.testng.version>
     </properties>
 </project>
