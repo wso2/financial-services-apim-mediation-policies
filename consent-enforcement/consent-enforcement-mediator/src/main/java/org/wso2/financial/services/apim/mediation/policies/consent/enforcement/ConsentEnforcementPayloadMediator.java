@@ -59,7 +59,7 @@ public class ConsentEnforcementPayloadMediator extends AbstractMediator {
             extractedConsentId = ConsentEnforcementUtils.extractConsentIdFromJwtToken(headers, consentIdClaimName);
         } catch (UnsupportedEncodingException e) {
             String errorDescription = "Failed to decode the JWT token payload. The token may be malformed or corrupted";
-            log.error(errorDescription);
+            log.error(errorDescription, e);
             setErrorResponseProperties(messageContext, "Bad Request", errorDescription, "400");
             throw new SynapseException(errorDescription);
         }
@@ -93,12 +93,12 @@ public class ConsentEnforcementPayloadMediator extends AbstractMediator {
             messageContext.setProperty("consentEnforcementJwtPayload", enforcementJWTPayload);
         } catch (JSONException e) {
             String errorDescription = "Invalid JSON payload";
-            log.error(errorDescription);
+            log.error(errorDescription, e);
             setErrorResponseProperties(messageContext, "Bad Request", errorDescription, "400");
             throw new SynapseException(errorDescription);
         } catch (JOSEException | ParseException e) {
             String errorDescription = "Error while generating JWT payload for consent validation";
-            log.error(errorDescription);
+            log.error(errorDescription, e);
             setErrorResponseProperties(messageContext, "Internal Server Error", errorDescription, "500");
             throw new SynapseException(errorDescription);
         }

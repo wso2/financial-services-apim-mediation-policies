@@ -63,7 +63,7 @@ public class MTLSHeaderEnforcementMediator extends AbstractMediator {
             }
         } catch (UnsupportedEncodingException | CertificateException e) {
             String errorDescription = "Error parsing the certificate from the header";
-            log.error(errorDescription);
+            log.error(errorDescription, e);
             setErrorResponseProperties(messageContext, "Unauthorized", errorDescription, "401");
             throw new SynapseException(errorDescription);
         }
