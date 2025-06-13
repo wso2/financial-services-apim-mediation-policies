@@ -31,6 +31,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.wso2.financial.services.apim.mediation.policies.consent.enforcement.constants.ConsentEnforcementConstants;
 import org.wso2.financial.services.apim.mediation.policies.consent.enforcement.utils.ConsentEnforcementUtils;
+import org.wso2.financial.services.apim.mediation.policies.consent.enforcement.utils.Generated;
 
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
@@ -106,14 +107,17 @@ public class ConsentEnforcementPayloadMediator extends AbstractMediator {
         return true;
     }
 
+    @Generated(message = "No testable logic")
     public String getConsentIdClaimName() {
         return consentIdClaimName;
     }
 
+    @Generated(message = "No testable logic")
     public void setConsentIdClaimName(String consentIdClaimName) {
         this.consentIdClaimName = consentIdClaimName;
     }
 
+    @Generated(message = "No testable logic")
     private static void setErrorResponseProperties(MessageContext messageContext, String errorCode,
                                                    String errorDescription, String httpStatusCode) {
 
