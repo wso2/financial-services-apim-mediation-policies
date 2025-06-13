@@ -25,6 +25,7 @@ import org.apache.synapse.SynapseException;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.wso2.financial.services.apim.mediation.policies.mtls.enforcement.constants.MTLSEnforcementConstants;
+import org.wso2.financial.services.apim.mediation.policies.mtls.enforcement.utils.Generated;
 import org.wso2.financial.services.apim.mediation.policies.mtls.enforcement.utils.MTLSEnforcementUtils;
 
 import java.io.UnsupportedEncodingException;
@@ -54,7 +55,7 @@ public class MTLSHeaderEnforcementMediator extends AbstractMediator {
 
         try {
             Certificate certificate = MTLSEnforcementUtils
-                    .getClientCertificateFromHeader(certificateHeaderValue, isClientCertificateEncoded);
+                    .parseCertificate(certificateHeaderValue, isClientCertificateEncoded);
             if (certificate == null) {
                 String errorDescription = "Certificate not found in the header";
                 log.error(errorDescription);
@@ -71,22 +72,27 @@ public class MTLSHeaderEnforcementMediator extends AbstractMediator {
         return true;
     }
 
+    @Generated(message = "No testable logic")
     public String getTransportCertHeaderName() {
         return transportCertHeaderName;
     }
 
+    @Generated(message = "No testable logic")
     public void setTransportCertHeaderName(String transportCertHeaderName) {
         this.transportCertHeaderName = transportCertHeaderName;
     }
 
+    @Generated(message = "No testable logic")
     public boolean isClientCertificateEncoded() {
         return isClientCertificateEncoded;
     }
 
+    @Generated(message = "No testable logic")
     public void setIsClientCertificateEncoded(boolean isClientCertificateEncoded) {
         this.isClientCertificateEncoded = isClientCertificateEncoded;
     }
 
+    @Generated(message = "No testable logic")
     private static void setErrorResponseProperties(MessageContext messageContext, String errorCode,
                                                    String errorDescription, String httpStatusCode) {
 

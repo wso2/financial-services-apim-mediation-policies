@@ -25,6 +25,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -35,7 +36,7 @@ import java.security.cert.CertificateFactory;
 public class MTLSEnforcementUtils {
 
     /**
-     * Extracts the client certificate from the header.
+     * Convert the client certificate from the header to a Certificate object.
      *
      * @param certificate certificate string from the header
      * @param isClientCertificateEncoded indicates whether the certificate is encoded
@@ -43,7 +44,7 @@ public class MTLSEnforcementUtils {
      * @throws UnsupportedEncodingException if the encoding is not supported
      * @throws CertificateException if there is an error in generating the certificate
      */
-    public static Certificate getClientCertificateFromHeader(String certificate, boolean isClientCertificateEncoded)
+    public static Certificate parseCertificate(String certificate, boolean isClientCertificateEncoded)
             throws UnsupportedEncodingException, CertificateException {
 
         byte[] bytes;
@@ -66,7 +67,7 @@ public class MTLSEnforcementUtils {
                         .concat(certificate)
                         .concat(System.lineSeparator())
                         .concat(MTLSEnforcementConstants.END_CERTIFICATE_STRING);
-                bytes = certificate.getBytes();
+                bytes = certificate.getBytes(StandardCharsets.UTF_8);
             } else {
                 certificate = URLDecoder.decode(certificate, "UTF-8");
                 certificate = getX509certificateContent(certificate);
