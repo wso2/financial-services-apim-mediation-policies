@@ -16,8 +16,7 @@
  ~ under the License.
  -->
 
-<!-- Storing the original request URI and payload for future reference -->
-<property name="originalEndpointURI" expression="get-property('To')" scope="default" type="STRING"/>
+<!-- Storing the original payload for future reference -->
 <property name="originalRequestPayload" expression="json-eval($)" scope="default" type="STRING"/>
 
 <!-- This class mediator is responsible for generating the payload for the consent validation service and is stored in the property 'consentEnforcementJwtPayload' -->
@@ -29,7 +28,7 @@
 <payloadFactory media-type="text">
     <format>$1</format>
     <args>
-        <arg expression="get-property('consentEnforcementJwtPayload')" />
+        <arg expression="$ctx:consentEnforcementJwtPayload" />
     </args>
 </payloadFactory>
 
@@ -53,16 +52,16 @@
 <property name="consentInformation" expression="json-eval($.consentInformation)" scope="default" type="STRING"/>
 
 <!-- Check if 'isValid' is true -->
-<filter source="get-property('isValid')" regex="true">
+<filter source="$ctx:isValid" regex="true">
     <then>
         <!-- Consent is valid -->
-        <filter xpath="boolean(get-property('modifiedPayload'))">
+        <filter xpath="boolean($ctx:modifiedPayload)">
             <then>
                 <!-- Set 'modifiedPayload' as new request body if available -->
                 <payloadFactory media-type="json">
                     <format>$1</format>
                     <args>
-                        <arg expression="get-property('modifiedPayload')"/>
+                        <arg expression="$ctx:modifiedPayload"/>
                     </args>
                 </payloadFactory>
             </then>
@@ -72,16 +71,16 @@
                 <payloadFactory media-type="json">
                     <format>$1</format>
                     <args>
-                        <arg expression="get-property('originalRequestPayload')"/>
+                        <arg expression="$ctx:originalRequestPayload"/>
                     </args>
                 </payloadFactory>
             </else>
         </filter>
 
-        <filter xpath="boolean(get-property('consentInformation'))">
+        <filter xpath="boolean($ctx:consentInformation)">
             <then>
                 <!-- Set 'consentInformation' as an HTTP header if available -->
-                <header name="Account-Request-Information" scope="transport" expression="get-property('consentInformation')"/>
+                <header name="Account-Request-Information" scope="transport" expression="$ctx:consentInformation"/>
             </then>
             <else>
                 <!-- 'consentInformation' is null -->
@@ -91,6 +90,11 @@
 
     <else>
         <!-- Consent is not valid -->
-        <!-- TODO: handle error properly -->
+        <!-- Setting required properties for generating the error response and sending the flow through the fault sequence -->
+        <property name="ERROR_CODE" value="Unauthorized"/>
+        <property name="ERROR_TITLE" value="Consent Enforcement Error"/>
+        <property name="ERROR_DESCRIPTION" value="Consent is not valid"/>
+        <property name="CUSTOM_HTTP_SC" value="401"/>
+        <sequence key="fault"/>
     </else>
 </filter>
