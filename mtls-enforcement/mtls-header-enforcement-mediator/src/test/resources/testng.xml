@@ -16,22 +16,12 @@
  ~ under the License.
  -->
 
-<!--
-Set "HTTP_SC" property to context to send the desired HTTP error status code back to the client.
-Example: <property name="HTTP_SC" value="401" scope="axis2"/>
--->
-
-<!-- TODO: parameterize the json and use args and handle error response formatting in a generic way -->
-<payloadFactory media-type="json">
-    <format>
-        {
-          "error": {
-            "code": "401",
-            "message": "Unauthorized",
-            "description": "Client certificate is missing"
-          }
-        }
-    </format>
-</payloadFactory>
-<header name="Content-Type" value="application/json" scope="transport"/>
-<respond/>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="MTLS Enforcement Mediator Test Suite">
+    <test name="MTLS Enforcement Mediator Test" parallel="tests" enabled="true" group-by-instances="true">
+        <classes>
+            <class name="org.wso2.financial.services.apim.mediation.policies.mtls.enforcement.MTLSHeaderEnforcementMediatorTest" />
+            <class name="org.wso2.financial.services.apim.mediation.policies.mtls.enforcement.utils.MTLSEnforcementUtilsTest" />
+        </classes>
+    </test>
+</suite>

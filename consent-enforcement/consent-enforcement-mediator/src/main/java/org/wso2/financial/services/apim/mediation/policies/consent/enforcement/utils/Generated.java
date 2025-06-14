@@ -16,21 +16,13 @@
  * under the License.
  */
 
-package org.wso2.financial.services.apim.mediation.policies.mtls.enforcement.constants;
+package org.wso2.financial.services.apim.mediation.policies.consent.enforcement.utils;
 
 /**
- * Constants class for the MTLS Enforcement Policy.
+ * An annotation to make methods skip code coverage. Use only with a valid reason to skip
+ * code coverage.
  */
-public class MTLSEnforcementConstants {
-
-    public static final String BEGIN_CERTIFICATE_STRING = "-----BEGIN CERTIFICATE-----";
-    public static final String END_CERTIFICATE_STRING = "-----END CERTIFICATE-----";
-
-    // Error constants
-    public static final String ERROR_CODE = "ERROR_CODE";
-    public static final String ERROR_TITLE = "ERROR_TITLE";
-    public static final String ERROR_DESCRIPTION = "ERROR_DESCRIPTION";
-    public static final String CUSTOM_HTTP_SC = "CUSTOM_HTTP_SC";
-
-
+@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.RUNTIME)
+public @interface Generated {
+    String message();
 }

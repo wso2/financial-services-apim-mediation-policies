@@ -18,27 +18,24 @@
 
 package org.wso2.financial.services.apim.mediation.policies.consent.enforcement.utils;
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JOSEObjectType;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.crypto.RSASSASigner;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.financial.services.apim.mediation.policies.consent.enforcement.constants.ConsentEnforcementConstants;
 
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
-import java.security.Key;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
-import java.util.Arrays;
+import java.security.PrivateKey;
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -48,13 +45,6 @@ import java.util.Map;
 public class ConsentEnforcementUtils {
 
     private static final Log log = LogFactory.getLog(ConsentEnforcementUtils.class);
-    private static final ServerConfiguration serverConfigs = ServerConfiguration.getInstance();
-
-    private static volatile Key key;
-    private static String keyStoreLocation;
-    private static char[] keyStorePassword;
-    private static String keyAlias;
-    private static String keyPassword;
 
     /**
      * Method to construct resource parameter map to invoke the validation service.
@@ -129,16 +119,25 @@ public class ConsentEnforcementUtils {
     }
 
     /**
-     * Method to generate JWT.
-     * @param payload Payload to be signed
-     * @return Signed JWT
+     * Method to generate JWT with the given payload.
+     *
+     * @param payload JSON payload as a string to be included in the JWT claims
+     * @return Serialized JWT as a string
+     * @throws ParseException
+     * @throws JOSEException
      */
-    public static String generateJWT(String payload) {
+    public static String generateJWT(String payload) throws ParseException, JOSEException {
 
-        return Jwts.builder()
-                .setPayload(payload)
-                .signWith(SignatureAlgorithm.RS512, getSigningKey())
-                .compact();
+        RSASSASigner signer = new RSASSASigner((PrivateKey) KeyStoreUtils.getSigningKey());
+        JWTClaimsSet claimsSet = JWTClaimsSet.parse(payload);
+
+        JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.RS512)
+                .type(JOSEObjectType.JWT)
+                .build();
+
+        SignedJWT signedJWT = new SignedJWT(header, claimsSet);
+        signedJWT.sign(signer);
+        return signedJWT.serialize();
     }
 
     /**
@@ -174,56 +173,5 @@ public class ConsentEnforcementUtils {
 
         return new JSONObject(new String(java.util.Base64.getDecoder().decode(payload),
                 String.valueOf(StandardCharsets.UTF_8)));
-    }
-
-    /**
-     * Method to obtain signing key.
-     *
-     * @return Key as an Object.
-     */
-    private static Key getSigningKey() {
-
-        if (key == null) {
-            synchronized (ConsentEnforcementUtils.class) {
-                if (key == null) {
-                    try (FileInputStream is = new FileInputStream(getKeyStoreLocation())) {
-                        KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
-                        keystore.load(is, getKeyStorePassword());
-                        key = keystore.getKey(getKeyAlias(), getKeyPassword().toCharArray());
-                    } catch (IOException | CertificateException | KeyStoreException | NoSuchAlgorithmException
-                             | UnrecoverableKeyException e) {
-                        log.error("Error occurred while retrieving private key from keystore ", e);
-                    }
-                }
-            }
-        }
-        return key;
-    }
-
-    private static String getKeyStoreLocation() {
-
-        return keyStoreLocation == null ? serverConfigs
-                .getFirstProperty(ConsentEnforcementConstants.KEYSTORE_LOCATION_TAG) : keyStoreLocation;
-    }
-
-    private static char[] getKeyStorePassword() {
-
-        if (keyStorePassword == null) {
-            keyStorePassword = serverConfigs
-                    .getFirstProperty(ConsentEnforcementConstants.KEYSTORE_PASSWORD_TAG).toCharArray();
-        }
-        return Arrays.copyOf(keyStorePassword, keyStorePassword.length);
-    }
-
-    private static String getKeyAlias() {
-
-        return keyAlias == null ? serverConfigs
-                .getFirstProperty(ConsentEnforcementConstants.SIGNING_ALIAS_TAG) : keyAlias;
-    }
-
-    private static String getKeyPassword() {
-
-        return keyPassword == null ? serverConfigs
-                .getFirstProperty(ConsentEnforcementConstants.SIGNING_KEY_PASSWORD) : keyPassword;
     }
 }

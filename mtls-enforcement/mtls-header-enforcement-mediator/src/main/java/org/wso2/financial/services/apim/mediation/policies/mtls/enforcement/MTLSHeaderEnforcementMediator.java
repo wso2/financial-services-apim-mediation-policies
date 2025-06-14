@@ -18,9 +18,14 @@
 
 package org.wso2.financial.services.apim.mediation.policies.mtls.enforcement;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.SynapseException;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
+import org.wso2.financial.services.apim.mediation.policies.mtls.enforcement.constants.MTLSEnforcementConstants;
+import org.wso2.financial.services.apim.mediation.policies.mtls.enforcement.utils.Generated;
 import org.wso2.financial.services.apim.mediation.policies.mtls.enforcement.utils.MTLSEnforcementUtils;
 
 import java.io.UnsupportedEncodingException;
@@ -32,6 +37,8 @@ import java.util.Map;
  * Mediator to enforce MTLS as a header in the request.
  */
 public class MTLSHeaderEnforcementMediator extends AbstractMediator {
+
+    private static final Log log = LogFactory.getLog(MTLSHeaderEnforcementMediator.class);
 
     private String transportCertHeaderName;
     private boolean isClientCertificateEncoded;
@@ -48,35 +55,50 @@ public class MTLSHeaderEnforcementMediator extends AbstractMediator {
 
         try {
             Certificate certificate = MTLSEnforcementUtils
-                    .getClientCertificateFromHeader(certificateHeaderValue, isClientCertificateEncoded);
+                    .parseCertificate(certificateHeaderValue, isClientCertificateEncoded);
             if (certificate == null) {
-                // TODO: handle error properly
-                return false;
+                String errorDescription = "Certificate not found in the header";
+                log.error(errorDescription);
+                setErrorResponseProperties(messageContext, "Unauthorized", errorDescription, "401");
+                throw new SynapseException(errorDescription);
             }
-        } catch (UnsupportedEncodingException e) {
-            // TODO: handle error properly
-            return false;
-        } catch (CertificateException e) {
-            // TODO: handle error properly
-            return false;
+        } catch (UnsupportedEncodingException | CertificateException e) {
+            String errorDescription = "Error parsing the certificate from the header";
+            log.error(errorDescription, e);
+            setErrorResponseProperties(messageContext, "Unauthorized", errorDescription, "401");
+            throw new SynapseException(errorDescription);
         }
 
         return true;
     }
 
+    @Generated(message = "No testable logic")
     public String getTransportCertHeaderName() {
         return transportCertHeaderName;
     }
 
+    @Generated(message = "No testable logic")
     public void setTransportCertHeaderName(String transportCertHeaderName) {
         this.transportCertHeaderName = transportCertHeaderName;
     }
 
+    @Generated(message = "No testable logic")
     public boolean isClientCertificateEncoded() {
         return isClientCertificateEncoded;
     }
 
+    @Generated(message = "No testable logic")
     public void setIsClientCertificateEncoded(boolean isClientCertificateEncoded) {
         this.isClientCertificateEncoded = isClientCertificateEncoded;
+    }
+
+    @Generated(message = "No testable logic")
+    private static void setErrorResponseProperties(MessageContext messageContext, String errorCode,
+                                                   String errorDescription, String httpStatusCode) {
+
+        messageContext.setProperty(MTLSEnforcementConstants.ERROR_CODE, errorCode);
+        messageContext.setProperty(MTLSEnforcementConstants.ERROR_TITLE, "MTLS Enforcement Error");
+        messageContext.setProperty(MTLSEnforcementConstants.ERROR_DESCRIPTION, errorDescription);
+        messageContext.setProperty(MTLSEnforcementConstants.CUSTOM_HTTP_SC, httpStatusCode);
     }
 }

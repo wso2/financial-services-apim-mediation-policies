@@ -16,21 +16,14 @@
  * under the License.
  */
 
-package org.wso2.financial.services.apim.mediation.policies.mtls.enforcement.constants;
+package org.wso2.financial.services.apim.mediation.policies.mtls.enforcement;
 
 /**
- * Constants class for the MTLS Enforcement Policy.
+ * Test class for MTLSHeaderEnforcementMediator.
  */
-public class MTLSEnforcementConstants {
+public class MTLSHeaderEnforcementMediatorTest {
 
-    public static final String BEGIN_CERTIFICATE_STRING = "-----BEGIN CERTIFICATE-----";
-    public static final String END_CERTIFICATE_STRING = "-----END CERTIFICATE-----";
-
-    // Error constants
-    public static final String ERROR_CODE = "ERROR_CODE";
-    public static final String ERROR_TITLE = "ERROR_TITLE";
-    public static final String ERROR_DESCRIPTION = "ERROR_DESCRIPTION";
-    public static final String CUSTOM_HTTP_SC = "CUSTOM_HTTP_SC";
 
 
 }
+

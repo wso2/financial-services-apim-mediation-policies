@@ -18,10 +18,12 @@
 
 package org.wso2.financial.services.apim.mediation.policies.consent.enforcement;
 
+import com.nimbusds.jose.JOSEException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.SynapseException;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
@@ -29,8 +31,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.wso2.financial.services.apim.mediation.policies.consent.enforcement.constants.ConsentEnforcementConstants;
 import org.wso2.financial.services.apim.mediation.policies.consent.enforcement.utils.ConsentEnforcementUtils;
+import org.wso2.financial.services.apim.mediation.policies.consent.enforcement.utils.Generated;
 
 import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -55,13 +59,17 @@ public class ConsentEnforcementPayloadMediator extends AbstractMediator {
         try {
             extractedConsentId = ConsentEnforcementUtils.extractConsentIdFromJwtToken(headers, consentIdClaimName);
         } catch (UnsupportedEncodingException e) {
-            // TODO: handle error properly
-            return false;
+            String errorDescription = "Failed to decode the JWT token payload. The token may be malformed or corrupted";
+            log.error(errorDescription, e);
+            setErrorResponseProperties(messageContext, "Bad Request", errorDescription, "400");
+            throw new SynapseException(errorDescription);
         }
 
         if (StringUtils.isBlank(extractedConsentId)) {
-            // TODO: handle error properly
-            return false;
+            String errorDescription = consentIdClaimName + " claim is not found in the JWT token";
+            log.error(errorDescription);
+            setErrorResponseProperties(messageContext, "Unauthorized", errorDescription, "401");
+            throw new SynapseException(errorDescription);
         }
 
         Map<String, Object> additionalParams = new HashMap<>();
@@ -81,22 +89,42 @@ public class ConsentEnforcementPayloadMediator extends AbstractMediator {
             String jsonPayload = JsonUtil.jsonPayloadToString(axis2MessageContext);
             validationRequest = ConsentEnforcementUtils
                     .createValidationRequestPayload(jsonPayload, headers, additionalParams);
+
+            String enforcementJWTPayload = ConsentEnforcementUtils.generateJWT(validationRequest.toString());
+            messageContext.setProperty("consentEnforcementJwtPayload", enforcementJWTPayload);
         } catch (JSONException e) {
-            // TODO: handle error properly
-            return false;
+            String errorDescription = "Invalid JSON payload";
+            log.error(errorDescription, e);
+            setErrorResponseProperties(messageContext, "Bad Request", errorDescription, "400");
+            throw new SynapseException(errorDescription);
+        } catch (JOSEException | ParseException e) {
+            String errorDescription = "Error while generating JWT payload for consent validation";
+            log.error(errorDescription, e);
+            setErrorResponseProperties(messageContext, "Internal Server Error", errorDescription, "500");
+            throw new SynapseException(errorDescription);
         }
 
-        String enforcementJWTPayload = ConsentEnforcementUtils.generateJWT(validationRequest.toString());
-        messageContext.setProperty("consentEnforcementJwtPayload", enforcementJWTPayload);
         return true;
     }
 
+    @Generated(message = "No testable logic")
     public String getConsentIdClaimName() {
         return consentIdClaimName;
     }
 
+    @Generated(message = "No testable logic")
     public void setConsentIdClaimName(String consentIdClaimName) {
         this.consentIdClaimName = consentIdClaimName;
+    }
+
+    @Generated(message = "No testable logic")
+    private static void setErrorResponseProperties(MessageContext messageContext, String errorCode,
+                                                   String errorDescription, String httpStatusCode) {
+
+        messageContext.setProperty(ConsentEnforcementConstants.ERROR_CODE, errorCode);
+        messageContext.setProperty(ConsentEnforcementConstants.ERROR_TITLE, "Consent Enforcement Error");
+        messageContext.setProperty(ConsentEnforcementConstants.ERROR_DESCRIPTION, errorDescription);
+        messageContext.setProperty(ConsentEnforcementConstants.CUSTOM_HTTP_SC, httpStatusCode);
     }
 
 }
