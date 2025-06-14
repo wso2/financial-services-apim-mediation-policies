@@ -296,6 +296,7 @@ public class DynamicClientRegistrationRequestMediator extends AbstractMediator {
                             "Invalid resource path in the request"));
             return false;
         }
+
         String[] resourceParts = resource.split(DCRConstants.SLASH);
         String clientIdSentInRequest = resourceParts.length > 2 ? resourceParts[2] : null;
 
@@ -306,7 +307,9 @@ public class DynamicClientRegistrationRequestMediator extends AbstractMediator {
                             "Authorization header is missing in the request"));
             return false;
         }
+
         String authHeader = headers.get(DCRConstants.AUTHORIZATION).toString().split(" ")[1];
+
         String extractedAuthHeader = null;
         try {
             extractedAuthHeader = DCRUtil.decodeRequestJWT(authHeader, DCRConstants.JWT_BODY);

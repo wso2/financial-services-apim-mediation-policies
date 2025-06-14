@@ -40,10 +40,10 @@
             <property name="token_endpoint" expression="get-property('token_endpoint_allow_reuse_pvt_key_jwt')"/>
         </log>
 
-        <!-- Check if client_name exists -->
+        <!-- Check if token_endpoint_allow_reuse_pvt_key_jwt exists -->
         <filter xpath="get-property('token_endpoint_allow_reuse_pvt_key_jwt')">
             <then>
-                <!-- Rebuild the payload with token_type merged -->
+                <!-- Rebuild the payload with token_endpoint_allow_reuse_pvt_key_jwt merged -->
                 <payloadFactory media-type="json">
                     <format>
                        {
@@ -65,7 +65,6 @@
                        <arg expression="get-property('token_endpoint_allow_reuse_pvt_key_jwt')"/>
                     </args>
                 </payloadFactory>
-                <!-- Enrich is not needed here. Optional flattening -->
                 <script language="js">
                     <![CDATA[
                         var body = mc.getPayloadJSON();
@@ -82,7 +81,7 @@
                 </script>
             </then>
             <else>
-                <!-- Rebuild the payload with token_type merged -->
+                <!-- Rebuild the payload without token_endpoint_allow_reuse_pvt_key_jwt -->
                 <payloadFactory media-type="json">
                     <format>
                        {
@@ -102,7 +101,6 @@
                        <arg expression="get-property('ext_application_display_name')"/>
                     </args>
                 </payloadFactory>
-                <!-- Enrich is not needed here. Optional flattening -->
                 <script language="js">
                     <![CDATA[
                         var body = mc.getPayloadJSON();
