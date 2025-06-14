@@ -77,6 +77,7 @@ public class DCRUtil {
      * @return optional json message
      * @throws DCRHandlingException thrown if unable to build
      */
+    @Generated(message = "Excluding from code coverage since can not call this method due to external service call")
     public static Optional<String> buildMessagePayloadFromMessageContext(
             org.apache.axis2.context.MessageContext axis2MC, String contentType) throws DCRHandlingException {
 
@@ -98,7 +99,7 @@ public class DCRUtil {
                 if (payload != null) {
                     requestPayload = payload.getText();
                 } else {
-                    requestPayload = "";
+                    requestPayload = StringUtils.EMPTY;
                 }
             } else {
                 // Get JSON Stream and cast to string
@@ -166,6 +167,7 @@ public class DCRUtil {
      * @throws BadJOSEException       When JOSE processing fails
      * @throws MalformedURLException  When JWKS URL is malformed
      */
+    @Generated(message = "Excluding from code coverage since can not call this method due to external service call")
     public static void validateRequestSignature(String payload, JSONObject decodedSSA,
                                                         String jwksEndpointName, int jwksConnectionTimeOut)
             throws ParseException, JOSEException, BadJOSEException, MalformedURLException {
@@ -191,6 +193,7 @@ public class DCRUtil {
      * @throws MalformedURLException if an error occurs while creating the URL
      *                               object
      */
+    @Generated(message = "Excluding from code coverage since can not call this method due to external service call")
     public static void validateJWTSignature(String jwtString, String jwksUri, String algorithm,
                                                     int jwksConnectionTimeOut)
             throws ParseException, BadJOSEException, JOSEException, MalformedURLException {
@@ -262,7 +265,7 @@ public class DCRUtil {
         }
         if (decodedRequest.has(DCRConstants.TOKEN_EP_AUTH_METHOD) &&
                 DCRConstants.PRIVATE_KEY_JWT.equals(decodedRequest.getString(DCRConstants.TOKEN_EP_AUTH_METHOD))) {
-            messageContext.setProperty(DCRConstants.TOKEN_EP_ALLOW_REUSE_PVT_KEY_JWT, "false");
+            messageContext.setProperty(DCRConstants.TOKEN_EP_ALLOW_REUSE_PVT_KEY_JWT, Boolean.FALSE.toString());
         }
     }
 
@@ -313,6 +316,7 @@ public class DCRUtil {
      * @param code           response code.
      * @param jsonPayload    json payload.
      */
+    @Generated(message = "Excluding from code coverage since can not call this method due to external service call")
     public static void returnSynapseHandlerJSONError(MessageContext messageContext, String code, String jsonPayload) {
 
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
@@ -332,16 +336,20 @@ public class DCRUtil {
      * @param messageContext messages context.
      * @param payload json payload.
      */
+    @Generated(message = "Excluding from code coverage since can not call this method due to external service call")
     private static void setJsonFaultPayloadToMessageContext(MessageContext messageContext, String payload) {
 
         org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext)
                 .getAxis2MessageContext();
 
+        axis2MessageContext.setProperty(DCRConstants.DISABLE_CHUNKING, Boolean.TRUE);
+        axis2MessageContext.setProperty(PassThroughConstants.NO_ENTITY_BODY, Boolean.FALSE);
+
         axis2MessageContext.setProperty(Constants.Configuration.MESSAGE_TYPE, MediaType.APPLICATION_JSON);
         axis2MessageContext.setProperty(Constants.Configuration.CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
         try {
-            JsonUtil.getNewJsonPayload(axis2MessageContext, payload, true, true);
+            JsonUtil.getNewJsonPayload(axis2MessageContext, payload, Boolean.TRUE, Boolean.TRUE);
         } catch (AxisFault axisFault) {
             log.error("Unable to set JSON payload to fault message", axisFault);
         }
@@ -352,6 +360,7 @@ public class DCRUtil {
      * @param messageContext messages context.
      * @param status error code.
      */
+    @Generated(message = "Excluding from code coverage since can not call this method due to external service call")
     private static void sendSynapseHandlerFaultResponse(MessageContext messageContext, String status) {
 
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
@@ -359,7 +368,7 @@ public class DCRUtil {
 
         axis2MC.setProperty(NhttpConstants.HTTP_SC, status);
         messageContext.setResponse(true);
-        messageContext.setProperty("RESPONSE", "true");
+        messageContext.setProperty(DCRConstants.RESPONSE, Boolean.TRUE.toString());
         messageContext.setTo(null);
         axis2MC.removeProperty(Constants.Configuration.CONTENT_TYPE);
         Axis2Sender.sendBack(messageContext);

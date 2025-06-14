@@ -65,6 +65,7 @@ public class DynamicClientRegistrationRequestMediator extends AbstractMediator {
                 axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
 
         String httpMethod = (String) messageContext.getProperty(DCRConstants.HTTP_METHOD);
+
         // Check if the HTTP method is POST or PUT to process DCR JWT validation and request alteration
         if (HttpMethod.POST.equals(httpMethod) || HttpMethod.PUT.equals(httpMethod)) {
             try {
@@ -75,11 +76,11 @@ public class DynamicClientRegistrationRequestMediator extends AbstractMediator {
                         contentType);
                 if (requestPayload.isPresent()) {
                     if (Objects.requireNonNull(contentType).contains(DCRConstants.JWT_CONTENT_TYPE)) {
+                        // Perform JWT Validation and Payload conversion and modification to JWT payloads
                         validateAndModifyPayload(messageContext, requestPayload.get(), headers);
-                        return true;
                     } else {
+                        // Perform Payload conversion and modification to JSON payloads
                         modifyJsonPayload(messageContext, requestPayload.get(), headers);
-                        return true;
                     }
                 } else {
                     log.error("Request payload is empty or not present.");
@@ -187,7 +188,6 @@ public class DynamicClientRegistrationRequestMediator extends AbstractMediator {
                                 .getString(DCRConstants.SOFTWARE_STATEMENT),
                         DCRConstants.JWT_BODY);
                 decodedSSA = new JSONObject(ssa);
-                messageContext.setProperty("decodedSSA", decodedSSA.toString());
             } catch (ParseException e) {
                 log.error("Error occurred while decoding the provided jwt", e);
                 throw new DCRHandlingException(DCRConstants.INVALID_SSA,
@@ -211,6 +211,14 @@ public class DynamicClientRegistrationRequestMediator extends AbstractMediator {
         appendModifiedPayload(messageContext, decodedRequestObj, decodedSSA, headers);
     }
 
+    /**
+     * Modify the JSON payload.
+     *
+     * @param messageContext   Message context of the request
+     * @param requestPayload   The request payload containing the JSON data
+     * @param headers          Map of headers in the request
+     * @throws DCRHandlingException  When an error occurs while modifying the JSON payload
+     */
     private void modifyJsonPayload(MessageContext messageContext, String requestPayload,
                                        Map<String, Object> headers) throws DCRHandlingException {
 
@@ -304,8 +312,8 @@ public class DynamicClientRegistrationRequestMediator extends AbstractMediator {
             extractedAuthHeader = DCRUtil.decodeRequestJWT(authHeader, DCRConstants.JWT_BODY);
         } catch (ParseException e) {
             log.error("Error occurred while decoding the provided auth header", e);
-            DCRUtil.returnSynapseHandlerJSONError(messageContext, "400",
-                    DCRUtil.getErrorResponse("invalid_request",
+            DCRUtil.returnSynapseHandlerJSONError(messageContext, DCRConstants.BAD_REQUEST_CODE,
+                    DCRUtil.getErrorResponse(DCRConstants.INVALID_REQUEST,
                             "Error occurred while decoding the provided auth header"));
             return false;
         }

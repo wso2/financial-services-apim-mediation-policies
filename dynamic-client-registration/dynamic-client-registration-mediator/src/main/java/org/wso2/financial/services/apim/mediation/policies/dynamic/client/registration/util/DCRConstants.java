@@ -26,7 +26,6 @@ public class DCRConstants {
     public static final String CONTENT_TYPE_TAG = "Content-Type";
     public static final String JWT_CONTENT_TYPE = "application/jwt";
     public static final String JSON_CONTENT_TYPE = "application/json";
-    public static final String JOSE_CONTENT_TYPE = "application/jose";
     public static final String HTTP_METHOD = "api.ut.HTTP_METHOD";
     public static final String JWT_HEAD = "head";
     public static final String JWT_BODY = "body";
@@ -34,13 +33,9 @@ public class DCRConstants {
     public static final String SOFTWARE_ID = "software_id";
     public static final String CLIENT_NAME = "client_name";
     public static final String JWKS_URI = "jwks_uri";
-    public static final String TOKEN_TYPE = "token_type_extension";
-    public static final String REQUIRE_SIGNED_OBJ = "require_signed_request_object";
-    public static final String TLS_CLIENT_CERT_ACCESS_TOKENS = "tls_client_certificate_bound_access_tokens";
     public static final String TOKEN_EP_ALLOW_REUSE_PVT_KEY_JWT = "token_endpoint_allow_reuse_pvt_key_jwt";
     public static final String PRIVATE_KEY_JWT = "private_key_jwt";
     public static final String APP_DISPLAY_NAME = "ext_application_display_name";
-    public static final String JWT = "JWT";
     public static final String TOKEN_EP_AUTH_METHOD = "token_endpoint_auth_method";
     public static final String DISALLOWED_CHARS_PATTERN = "([~!#$;%^&*+={}\\s\\|\\\\<>\\\"\\'\\/,\\]\\[\\(\\)])";
     public static final String SUBSTITUTE_STRING = "_";
@@ -51,8 +46,8 @@ public class DCRConstants {
     public static final String SLASH = "/";
     public static final String AUTHORIZATION = "Authorization";
     public static final String CLIENT_ID = "client_id";
-    public static final String DECODED_REQUEST = "decodedRequest";
-    public static final String DECODED_SSA = "decodedSSA";
+    public static final String DISABLE_CHUNKING = "DISABLE_CHUNKING";
+    public static final String RESPONSE = "RESPONSE";
 
     //HTTP Codes
     public static final String BAD_REQUEST_CODE = "400";

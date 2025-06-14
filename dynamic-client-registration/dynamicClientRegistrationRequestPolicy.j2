@@ -17,62 +17,106 @@
  -->
 
 <class name="org.wso2.financial.services.apim.mediation.policies.dynamic.client.registration.DynamicClientRegistrationRequestMediator">
-    <property name="validateRequestJWT" value="true"/>
-    <property name="jwksEndpointName" value="software_jwks_endpoint"/>
-    <property name="clientNameAttributeName" value="software_client_name"/>
-    <property name="useSoftwareIdAsAppName" value="true"/>
-    <property name="jwksEndpointTimeout" value="3000"/>
+    <property name="validateRequestJWT" value="{{validateRequestJWT}}"/>
+    <property name="jwksEndpointName" value="{{jwksEndpointName}}"/>
+    <property name="clientNameAttributeName" value="{{clientNameAttributeName}}"/>
+    <property name="useSoftwareIdAsAppName" value="{{useSoftwareIdAsAppName}}"/>
+    <property name="jwksEndpointTimeout" value="{{jwksEndpointTimeout}}"/>
 </class>
 
-<!-- Ensure Synapse handles the message as JSON -->
-<property name="messageType" value="application/json" scope="axis2"/>
-<property name="Content-Type" value="application/json" scope="transport"/>
+<filter source="$ctx:REST_METHOD" regex="POST|PUT">
+    <then>
+        <!-- Ensure Synapse handles the message as JSON -->
+        <property name="messageType" value="application/json" scope="axis2"/>
+        <property name="Content-Type" value="application/json" scope="transport"/>
 
-<!-- Save the original payload -->
-<property name="original_payload" expression="json-eval($)" scope="default"/>
+        <!-- Save the original payload -->
+        <property name="original_payload" expression="json-eval($)" scope="default"/>
 
-<log level="custom">
-    <property name="client" expression="get-property('client_name')"/>
-    <property name="jwks" expression="get-property('jwks_uri')"/>
-    <property name="display_name" expression="get-property('ext_application_display_name')"/>
-    <property name="token_endpoint" expression="get-property('token_endpoint_allow_reuse_pvt_key_jwt')"/>
-</log>
+        <log level="custom">
+            <property name="client" expression="get-property('client_name')"/>
+            <property name="jwks" expression="get-property('jwks_uri')"/>
+            <property name="display_name" expression="get-property('ext_application_display_name')"/>
+            <property name="token_endpoint" expression="get-property('token_endpoint_allow_reuse_pvt_key_jwt')"/>
+        </log>
 
-<!-- Rebuild the payload with token_type merged -->
-<payloadFactory media-type="json">
-    <format>
-       {
-             "token_type_extension": "JWT",
-             "require_signed_request_object": true,
-             "tls_client_certificate_bound_access_tokens": true,
-             "client_name": "$2",
-             "jwks_uri": "$3",
-             "ext_application_display_name": "$4",
-             "token_endpoint_allow_reuse_pvt_key_jwt": $5,
-             "merged": $1
-       }
-    </format>
-    <args>
-       <arg evaluator="json" expression="json-eval($)"/>
-       <arg expression="get-property('client_name')"/>
-       <arg expression="get-property('jwks_uri')"/>
-       <arg expression="get-property('ext_application_display_name')"/>
-       <arg expression="get-property('token_endpoint_allow_reuse_pvt_key_jwt')"/>
-    </args>
-</payloadFactory>
-
-<!-- Enrich is not needed here. Optional flattening -->
-<script language="js">
-    <![CDATA[
-        var body = mc.getPayloadJSON();
-        var merged = body.merged;
-        merged.token_type_extension = body.token_type_extension;
-        merged.require_signed_request_object = body.require_signed_request_object;
-        merged.tls_client_certificate_bound_access_tokens = body.tls_client_certificate_bound_access_tokens;
-        merged.client_name = body.client_name;
-        merged.jwks_uri = body.jwks_uri;
-        merged.ext_application_display_name = body.ext_application_display_name;
-        merged.token_endpoint_allow_reuse_pvt_key_jwt = body.token_endpoint_allow_reuse_pvt_key_jwt;
-        mc.setPayloadJSON(merged);
-    ]]>
-</script>
+        <!-- Check if client_name exists -->
+        <filter xpath="get-property('token_endpoint_allow_reuse_pvt_key_jwt')">
+            <then>
+                <!-- Rebuild the payload with token_type merged -->
+                <payloadFactory media-type="json">
+                    <format>
+                       {
+                             "token_type_extension": "JWT",
+                             "require_signed_request_object": true,
+                             "tls_client_certificate_bound_access_tokens": true,
+                             "client_name": "$2",
+                             "jwks_uri": "$3",
+                             "ext_application_display_name": "$4",
+                             "token_endpoint_allow_reuse_pvt_key_jwt": $5,
+                             "merged": $1
+                       }
+                    </format>
+                    <args>
+                       <arg evaluator="json" expression="json-eval($)"/>
+                       <arg expression="get-property('client_name')"/>
+                       <arg expression="get-property('jwks_uri')"/>
+                       <arg expression="get-property('ext_application_display_name')"/>
+                       <arg expression="get-property('token_endpoint_allow_reuse_pvt_key_jwt')"/>
+                    </args>
+                </payloadFactory>
+                <!-- Enrich is not needed here. Optional flattening -->
+                <script language="js">
+                    <![CDATA[
+                        var body = mc.getPayloadJSON();
+                        var merged = body.merged;
+                        merged.token_type_extension = body.token_type_extension;
+                        merged.require_signed_request_object = body.require_signed_request_object;
+                        merged.tls_client_certificate_bound_access_tokens = body.tls_client_certificate_bound_access_tokens;
+                        merged.client_name = body.client_name;
+                        merged.jwks_uri = body.jwks_uri;
+                        merged.ext_application_display_name = body.ext_application_display_name;
+                        merged.token_endpoint_allow_reuse_pvt_key_jwt = body.token_endpoint_allow_reuse_pvt_key_jwt;
+                        mc.setPayloadJSON(merged);
+                    ]]>
+                </script>
+            </then>
+            <else>
+                <!-- Rebuild the payload with token_type merged -->
+                <payloadFactory media-type="json">
+                    <format>
+                       {
+                             "token_type_extension": "JWT",
+                             "require_signed_request_object": true,
+                             "tls_client_certificate_bound_access_tokens": true,
+                             "client_name": "$2",
+                             "jwks_uri": "$3",
+                             "ext_application_display_name": "$4",
+                             "merged": $1
+                       }
+                    </format>
+                    <args>
+                       <arg evaluator="json" expression="json-eval($)"/>
+                       <arg expression="get-property('client_name')"/>
+                       <arg expression="get-property('jwks_uri')"/>
+                       <arg expression="get-property('ext_application_display_name')"/>
+                    </args>
+                </payloadFactory>
+                <!-- Enrich is not needed here. Optional flattening -->
+                <script language="js">
+                    <![CDATA[
+                        var body = mc.getPayloadJSON();
+                        var merged = body.merged;
+                        merged.token_type_extension = body.token_type_extension;
+                        merged.require_signed_request_object = body.require_signed_request_object;
+                        merged.tls_client_certificate_bound_access_tokens = body.tls_client_certificate_bound_access_tokens;
+                        merged.client_name = body.client_name;
+                        merged.jwks_uri = body.jwks_uri;
+                        merged.ext_application_display_name = body.ext_application_display_name;
+                        mc.setPayloadJSON(merged);
+                    ]]>
+                </script>
+            </else>
+        </filter>
+    </then>
+</filter>
