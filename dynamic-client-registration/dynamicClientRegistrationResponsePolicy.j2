@@ -16,16 +16,7 @@
  ~ under the License.
  -->
 
-<script language="js">
-    <![CDATA[
-        var payload = mc.getPayloadJSON();
-        delete payload.token_type_extension;
-        delete payload.require_signed_request_object;
-        delete payload.tls_client_certificate_bound_access_tokens;
-        delete payload.client_name;
-        delete payload.jwks_uri;
-        delete payload.ext_application_display_name;
-        delete payload.token_endpoint_allow_reuse_pvt_key_jwt;
-        mc.setPayloadJSON(payload);
-    ]]>
-</script>
+<enrich>
+    <source clone="true" xpath="json-eval($.token_type_extension,$.client_name,$.require_signed_request_object,$.tls_client_certificate_bound_access_tokens,$.jwks_uri,$.ext_application_display_name,$.token_endpoint_allow_reuse_pvt_key_jwt)"/>
+    <target type="body" action="remove"/>
+</enrich>
