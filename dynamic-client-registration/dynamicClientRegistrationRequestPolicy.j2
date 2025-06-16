@@ -40,8 +40,12 @@
             <property name="token_endpoint" expression="get-property('token_endpoint_allow_reuse_pvt_key_jwt')"/>
         </log>
 
+        <enrich>
+            <source clone="true" property="client" type="property"/>
+            <target action="child" xpath="json-eval($)"/>
+        </enrich>
         <!-- Check if token_endpoint_allow_reuse_pvt_key_jwt exists -->
-        <filter xpath="get-property('token_endpoint_allow_reuse_pvt_key_jwt')">
+        <!-- filter xpath="get-property('token_endpoint_allow_reuse_pvt_key_jwt')">
             <then>
                 <!-- Rebuild the payload with token_endpoint_allow_reuse_pvt_key_jwt merged -->
                 <payloadFactory media-type="json">
@@ -115,6 +119,6 @@
                     ]]>
                 </script>
             </else>
-        </filter>
+        </filter -->
     </then>
 </filter>

@@ -66,10 +66,17 @@ public class DynamicClientRegistrationRequestMediator extends AbstractMediator {
 
         String httpMethod = (String) messageContext.getProperty(DCRConstants.HTTP_METHOD);
 
+        // For DCR retrieval, update and delete requests, check whether the token is bound to the correct client id
+        if (HttpMethod.GET.equals(httpMethod) || HttpMethod.PUT.equals(httpMethod) ||
+                HttpMethod.DELETE.equals(httpMethod)) {
+            log.debug("Checking whether the token is bound to the correct client id");
+            return validateClientId(messageContext, headers);
+        }
+
         // Check if the HTTP method is POST or PUT to process DCR JWT validation and request alteration
         if (HttpMethod.POST.equals(httpMethod) || HttpMethod.PUT.equals(httpMethod)) {
             try {
-                log.info("Processing DCR JWT validation and request alteration.");
+                log.debug("Processing DCR JWT validation and request alteration.");
                 String contentType = headers.containsKey(DCRConstants.CONTENT_TYPE_TAG) ?
                         headers.get(DCRConstants.CONTENT_TYPE_TAG).toString() : null;
                 Optional<String> requestPayload = DCRUtil.buildMessagePayloadFromMessageContext(axis2MessageContext,
@@ -91,19 +98,13 @@ public class DynamicClientRegistrationRequestMediator extends AbstractMediator {
                 }
 
             } catch (DCRHandlingException e) {
+                log.error("Error occurred while processing DCR request", e);
                 DCRUtil.returnSynapseHandlerJSONError(messageContext, e.getHttpCode(),
                         DCRUtil.getErrorResponse(e.getErrorCode(), e.getMessage()));
                 return false;
             }
         } else {
             log.debug("HTTP method is not POST or PUT. Skipping DCR JWT validation and request alteration.");
-        }
-
-        // For DCR retrieval, update and delete requests, check whether the token is bound to the correct client id
-        if (HttpMethod.GET.equals(httpMethod) || HttpMethod.PUT.equals(httpMethod) ||
-                HttpMethod.DELETE.equals(httpMethod)) {
-            log.info("Checking whether the token is bound to the correct client id");
-            return validateClientId(messageContext, headers);
         }
 
         return true;
