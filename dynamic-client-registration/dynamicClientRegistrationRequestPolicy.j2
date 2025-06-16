@@ -33,92 +33,35 @@
         <!-- Save the original payload -->
         <property name="original_payload" expression="json-eval($)" scope="default"/>
 
-        <log level="custom">
-            <property name="client" expression="get-property('client_name')"/>
-            <property name="jwks" expression="get-property('jwks_uri')"/>
-            <property name="display_name" expression="get-property('ext_application_display_name')"/>
-            <property name="token_endpoint" expression="get-property('token_endpoint_allow_reuse_pvt_key_jwt')"/>
-        </log>
+        <!-- Set the properties set from class mediator to the inline properties -->
+        <property name="clientName" expression="get-property('client_name')"/>
+        <property name="jwksUri" expression="get-property('jwks_uri')"/>
+        <property name="extAppName" expression="get-property('ext_application_display_name')"/>
+        <property name="tokenEPReusePvtKeyJWT" expression="get-property('token_endpoint_allow_reuse_pvt_key_jwt')"/>
 
-        <enrich>
-            <source clone="true" property="client" type="property"/>
-            <target action="child" xpath="json-eval($)"/>
-        </enrich>
-        <!-- Check if token_endpoint_allow_reuse_pvt_key_jwt exists -->
-        <!-- filter xpath="get-property('token_endpoint_allow_reuse_pvt_key_jwt')">
+        <!-- Modify payload to include the required properties -->
+        <filter xpath="get-property('token_endpoint_allow_reuse_pvt_key_jwt')">
             <then>
-                <!-- Rebuild the payload with token_endpoint_allow_reuse_pvt_key_jwt merged -->
-                <payloadFactory media-type="json">
-                    <format>
-                       {
-                             "token_type_extension": "JWT",
-                             "require_signed_request_object": true,
-                             "tls_client_certificate_bound_access_tokens": true,
-                             "client_name": "$2",
-                             "jwks_uri": "$3",
-                             "ext_application_display_name": "$4",
-                             "token_endpoint_allow_reuse_pvt_key_jwt": $5,
-                             "merged": $1
-                       }
-                    </format>
-                    <args>
-                       <arg evaluator="json" expression="json-eval($)"/>
-                       <arg expression="get-property('client_name')"/>
-                       <arg expression="get-property('jwks_uri')"/>
-                       <arg expression="get-property('ext_application_display_name')"/>
-                       <arg expression="get-property('token_endpoint_allow_reuse_pvt_key_jwt')"/>
-                    </args>
-                </payloadFactory>
-                <script language="js">
-                    <![CDATA[
-                        var body = mc.getPayloadJSON();
-                        var merged = body.merged;
-                        merged.token_type_extension = body.token_type_extension;
-                        merged.require_signed_request_object = body.require_signed_request_object;
-                        merged.tls_client_certificate_bound_access_tokens = body.tls_client_certificate_bound_access_tokens;
-                        merged.client_name = body.client_name;
-                        merged.jwks_uri = body.jwks_uri;
-                        merged.ext_application_display_name = body.ext_application_display_name;
-                        merged.token_endpoint_allow_reuse_pvt_key_jwt = body.token_endpoint_allow_reuse_pvt_key_jwt;
-                        mc.setPayloadJSON(merged);
-                    ]]>
-                </script>
+                <enrich description="">
+                    <source clone="true" type="inline">
+                        {"client_name": {$ctx:clientName},
+                        "jwks_uri": {$ctx:jwksUri},
+                        "ext_application_display_name": {$ctx:extAppName},
+                        "token_endpoint_allow_reuse_pvt_key_jwt": {$ctx:tokenEPReusePvtKeyJWT}}
+                    </source>
+                    <target action="child" xpath="json-eval($)"/>
+                </enrich>
             </then>
             <else>
-                <!-- Rebuild the payload without token_endpoint_allow_reuse_pvt_key_jwt -->
-                <payloadFactory media-type="json">
-                    <format>
-                       {
-                             "token_type_extension": "JWT",
-                             "require_signed_request_object": true,
-                             "tls_client_certificate_bound_access_tokens": true,
-                             "client_name": "$2",
-                             "jwks_uri": "$3",
-                             "ext_application_display_name": "$4",
-                             "merged": $1
-                       }
-                    </format>
-                    <args>
-                       <arg evaluator="json" expression="json-eval($)"/>
-                       <arg expression="get-property('client_name')"/>
-                       <arg expression="get-property('jwks_uri')"/>
-                       <arg expression="get-property('ext_application_display_name')"/>
-                    </args>
-                </payloadFactory>
-                <script language="js">
-                    <![CDATA[
-                        var body = mc.getPayloadJSON();
-                        var merged = body.merged;
-                        merged.token_type_extension = body.token_type_extension;
-                        merged.require_signed_request_object = body.require_signed_request_object;
-                        merged.tls_client_certificate_bound_access_tokens = body.tls_client_certificate_bound_access_tokens;
-                        merged.client_name = body.client_name;
-                        merged.jwks_uri = body.jwks_uri;
-                        merged.ext_application_display_name = body.ext_application_display_name;
-                        mc.setPayloadJSON(merged);
-                    ]]>
-                </script>
+                <enrich description="">
+                    <source clone="true" type="inline">
+                        {"client_name": {$ctx:clientName},
+                        "jwks_uri": {$ctx:jwksUri},
+                        "ext_application_display_name": {$ctx:extAppName}}
+                    </source>
+                    <target action="child" xpath="json-eval($)"/>
+               </enrich>
             </else>
-        </filter -->
+         </filter>
     </then>
 </filter>
