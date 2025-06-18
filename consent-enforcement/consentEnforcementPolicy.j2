@@ -16,8 +16,9 @@
  ~ under the License.
  -->
 
-<!-- Storing the original payload for future reference -->
-<property name="originalRequestPayload" expression="json-eval($)" scope="default" type="STRING"/>
+<!-- Storing the original body for future reference -->
+<property name="originalRequestJsonBody" expression="json-eval($)" scope="default" type="STRING"/>
+<property name="originalRequestBody" expression="$body"/>
 
 <!-- This class mediator is responsible for generating the payload for the consent validation service and is stored in the property 'consentEnforcementJwtPayload' -->
 <class name="org.wso2.financial.services.apim.mediation.policies.consent.enforcement.ConsentEnforcementPayloadMediator">
@@ -39,17 +40,32 @@
 <!-- Set the 'messageType' property required by the axis2 layer, this property controls how Synapse serializes the request body -->
 <property name="messageType" scope="axis2" value="application/jwt"/>
 
-<!-- Call the consent validation endpoint -->
-<call>
+<!-- Disabling default behaviour of appending the sub request path to URL -->
+<property name="REST_URL_POSTFIX" scope="axis2" action="remove"/>
+
+<!-- Call the consent validation endpoint in blocking mode -->
+<call blocking="true">
     <endpoint>
         <http method="POST" uri-template="{{consentServiceBaseUrl}}/api/fs/consent/validate/validate"/>
     </endpoint>
 </call>
 
 <!-- Extract required attributes from the response JSON into properties -->
-<property name="isValid" expression="json-eval($.isValid)" scope="default" type="BOOLEAN"/>
+<property name="isValid" expression="json-eval($.isValid)" scope="default" type="STRING"/>
 <property name="modifiedPayload" expression="json-eval($.modifiedPayload)" scope="default" type="STRING"/>
 <property name="consentInformation" expression="json-eval($.consentInformation)" scope="default" type="STRING"/>
+
+<!-- Check if 'isValid' is null -->
+<filter xpath="not($ctx:isValid)">
+    <then>
+        <!-- Setting required properties for generating the error response and sending the flow through the fault sequence -->
+        <property name="ERROR_CODE" value="Internal Server Error"/>
+        <property name="ERROR_TITLE" value="Consent Enforcement Error"/>
+        <property name="ERROR_DESCRIPTION" value="Unexpected error occurred at the consent validation service"/>
+        <property name="CUSTOM_HTTP_SC" value="500"/>
+        <sequence key="fault"/>
+    </then>
+</filter>
 
 <!-- Check if 'isValid' is true -->
 <filter source="$ctx:isValid" regex="true">
@@ -67,13 +83,23 @@
             </then>
             <else>
                 <!-- 'modifiedPayload' is null -->
-                <!-- Set 'originalRequestPayload' as the request body when 'modifiedPayload' is not available -->
-                <payloadFactory media-type="json">
-                    <format>$1</format>
-                    <args>
-                        <arg expression="$ctx:originalRequestPayload"/>
-                    </args>
-                </payloadFactory>
+                <!-- Set 'originalRequestBody' as the request body when 'modifiedPayload' is not available -->
+                <filter source="$ctx:api.ut.HTTP_METHOD" regex="^(GET|DELETE)$">
+                    <then>
+                        <enrich>
+                            <source clone="false" type="property" property="originalRequestBody"/>
+                            <target action="replace" type="body"/>
+                        </enrich>
+                    </then>
+                    <else>
+                        <payloadFactory media-type="json">
+                            <format>$1</format>
+                            <args>
+                               <arg evaluator="xml" expression="$ctx:originalRequestJsonBody"/>
+                            </args>
+                        </payloadFactory>
+                    </else>
+                </filter>
             </else>
         </filter>
 
@@ -91,10 +117,10 @@
     <else>
         <!-- Consent is not valid -->
         <!-- Setting required properties for generating the error response and sending the flow through the fault sequence -->
-        <property name="ERROR_CODE" value="Unauthorized"/>
+        <property name="ERROR_CODE" expression="json-eval($.errorCode)"/>
         <property name="ERROR_TITLE" value="Consent Enforcement Error"/>
-        <property name="ERROR_DESCRIPTION" value="Consent is not valid"/>
-        <property name="CUSTOM_HTTP_SC" value="401"/>
+        <property name="ERROR_DESCRIPTION" expression="json-eval($.errorMessage)"/>
+        <property name="CUSTOM_HTTP_SC" expression="json-eval($.httpCode)"/>
         <sequence key="fault"/>
     </else>
 </filter>
