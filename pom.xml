@@ -41,6 +41,7 @@
     <modules>
         <module>consent-enforcement/consent-enforcement-mediator</module>
         <module>mtls-enforcement/mtls-header-enforcement-mediator</module>
+        <module>dynamic-client-registration/dynamic-client-registration-mediator</module>
     </modules>
 
     <repositories>
@@ -207,11 +208,6 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.wso2.orbit.com.nimbusds</groupId>
-                <artifactId>nimbus-jose-jwt</artifactId>
-                <version>${org.wso2.orbit.nimbus.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
                 <version>${commons-codec.version}</version>
@@ -231,6 +227,11 @@
                         <artifactId>javassist</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.com.nimbusds</groupId>
+                <artifactId>nimbus-jose-jwt</artifactId>
+                <version>${org.wso2.orbit.nimbus.version}</version>
             </dependency>
             <!-- Test Dependencies -->
             <dependency>
@@ -268,6 +269,10 @@
         <maven.compiler.plugin.version>3.8.0</maven.compiler.plugin.version>
         <maven.surefire.plugin.version>2.22.2</maven.surefire.plugin.version>
         <maven.spotbugsplugin.version>4.8.2.0</maven.spotbugsplugin.version>
+        <com.h3xstream.findsecbugs.version>1.12.0</com.h3xstream.findsecbugs.version>
+        <!--Third Party Dependencies-->
+        <jjwt.version>0.9.1</jjwt.version>
+        <org.wso2.orbit.nimbus.version>9.37.3.wso2v1</org.wso2.orbit.nimbus.version>
         <!--Base Products related dependencies-->
         <synapse.version>2.1.7-wso2v217</synapse.version>
         <org.wso2.carbon.apimgt.version>9.30.10</org.wso2.carbon.apimgt.version>
