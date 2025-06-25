@@ -169,6 +169,7 @@ public class JwsRequestHeaderValidationMediator extends AbstractMediator {
         JWSHeader jwsHeader = JWSHeader.parse(encodedHeader);
 
         PublicKey publicKey = getPublicKeyFromJWKS(jwksUrl, jwsHeader.getKeyID());
+        log.debug("Retrieved public key for JWS verification");
 
         // Create custom critical header policy
         Set<String> deferredCritHeaders = JwsUtils.getDifferedCritHeaders();
@@ -176,8 +177,11 @@ public class JwsRequestHeaderValidationMediator extends AbstractMediator {
         boolean areCustomClaimsValid = validateCustomClaims(messageContext, jwsHeader, jwksUrl);
 
         if (!areCustomClaimsValid) {
+            log.debug("Custom claims are not valid");
             return false;
         }
+
+        log.debug("Custom claims are valid");
 
         JWSVerifier verifier = JwsUtils.getJwsVerifier(publicKey, jwsHeader, deferredCritHeaders);
 
