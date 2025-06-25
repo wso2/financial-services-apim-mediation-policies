@@ -42,6 +42,7 @@
         <module>consent-enforcement/consent-enforcement-mediator</module>
         <module>mtls-enforcement/mtls-header-enforcement-mediator</module>
         <module>dynamic-client-registration/dynamic-client-registration-mediator</module>
+        <module>jws/jws-mediator</module>
     </modules>
 
     <repositories>
