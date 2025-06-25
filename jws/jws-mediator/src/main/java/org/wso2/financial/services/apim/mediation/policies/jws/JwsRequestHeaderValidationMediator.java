@@ -90,9 +90,15 @@ public class JwsRequestHeaderValidationMediator extends AbstractMediator {
         String payload = JwsUtils.extractPayload(axis2MessageContext, headers);
         String jwSignature = headers.get(jwSignatureHeaderName);
 
+        String restFullRequestPath = (String) messageContext.getProperty(JwsConstants.REST_FULL_REQUEST_PATH);
+        String httpMethod = (String) messageContext.getProperty(JwsConstants.HTTP_METHOD);
+
+        // For logging purposes
+        String pathWithMethod = restFullRequestPath + ":" + httpMethod;
+
         if (StringUtils.isEmpty(jwSignature)) {
             String errorDescription = "Empty JWS Signature";
-            log.error(errorDescription);
+            log.error(errorDescription + ". for request: " + pathWithMethod);
             setErrorResponseProperties(messageContext, "Bad Request", errorDescription, "400");
             throw new SynapseException(errorDescription);
         }
@@ -111,7 +117,7 @@ public class JwsRequestHeaderValidationMediator extends AbstractMediator {
             String restMethod = (String) messageContext.getProperty("REST_METHOD");
             if (HttpMethod.POST.equals(restMethod) || HttpMethod.PUT.equals(restMethod)) {
                 String errorDescription = "Request payload cannot be empty";
-                log.error(errorDescription);
+                log.error(errorDescription + ". for request: " + pathWithMethod);
                 setErrorResponseProperties(messageContext, "Bad Request", errorDescription, "400");
                 throw new SynapseException(errorDescription);
             }
@@ -123,14 +129,14 @@ public class JwsRequestHeaderValidationMediator extends AbstractMediator {
 
             if (!verified) {
                 String errorDescription = "Invalid JWS Signature";
-                log.error(errorDescription);
+                log.error(errorDescription + ". for request: " + pathWithMethod);
                 setErrorResponseProperties(messageContext, "Bad Request", errorDescription, "400");
                 throw new SynapseException(errorDescription);
             }
 
             return true;
         } catch (IOException | ParseException | JOSEException | SynapseException e) {
-            log.error(e);
+            log.error(e.getMessage() + ". for request: " + pathWithMethod, e);
             setErrorResponseProperties(messageContext, "Bad Request", e.getMessage(), "400");
             throw new SynapseException(e.getMessage());
         }
@@ -153,7 +159,7 @@ public class JwsRequestHeaderValidationMediator extends AbstractMediator {
 
         String[] parts = detachedJWS.split("\\.");
         if (parts.length != 3) {
-            throw new IllegalArgumentException("Invalid detached JWS format. Expected format: <header>..<signature>");
+            throw new SynapseException("Invalid detached JWS format. Expected format: <header>..<signature>");
         }
 
         Base64URL encodedHeader = new Base64URL(parts[0]);
@@ -177,12 +183,16 @@ public class JwsRequestHeaderValidationMediator extends AbstractMediator {
 
         if (JwsUtils.isPayloadB64Encoded(jwsHeader)) {
             // b64=true
+            log.debug("Reconstructing the JWS by base64 encoding the payload");
+
             String reconstructedJws = JwsUtils.reconstructJws(detachedJWS, payload);
             JWSObject jwsObject = JWSObject.parse(reconstructedJws);
             return jwsObject.verify(verifier);
         } else {
             // b64=false (raw payload used in signature input)
             // Construct the signing input: base64url(header) + "." + payload
+            log.debug("Reconstructing the JWS using the raw payload bytes");
+
             String signingInput = encodedHeader + "." + payload;
             byte[] signingInputBytes = signingInput.getBytes(StandardCharsets.US_ASCII);
             return verifier.verify(jwsHeader, signingInputBytes, encodedSignature);

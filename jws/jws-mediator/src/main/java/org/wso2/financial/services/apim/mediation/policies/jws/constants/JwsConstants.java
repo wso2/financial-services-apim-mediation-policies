@@ -34,6 +34,8 @@ public class JwsConstants {
     public static final String ISS_FORMAT = "^([a-zA-Z0-9]{0,})\\/([a-zA-Z0-9]{0,})$";
     public static final String APPLICATION_JSON = "application/json";
     public static final String JSON = "json";
+    public static final String REST_FULL_REQUEST_PATH = "REST_FULL_REQUEST_PATH";
+    public static final String HTTP_METHOD = "api.ut.HTTP_METHOD";
 
     // Claims
     public static final String IAT_CLAIM_KEY = "http://openbanking.org.uk/iat";
