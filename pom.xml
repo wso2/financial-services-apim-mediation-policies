@@ -39,9 +39,10 @@
     </scm>
 
     <modules>
-        <module>consent-enforcement/consent-enforcement-mediator</module>
-        <module>mtls-enforcement/mtls-header-enforcement-mediator</module>
-        <module>dynamic-client-registration/dynamic-client-registration-mediator</module>
+        <module>common/consent-enforcement/consent-enforcement-mediator</module>
+        <module>common/mtls-enforcement/mtls-header-enforcement-mediator</module>
+        <module>common/dynamic-client-registration/dynamic-client-registration-mediator</module>
+        <module>fs-apim-mediation-artifacts</module>
     </modules>
 
     <repositories>
@@ -283,5 +284,7 @@
         <mockito.version>5.3.1</mockito.version>
         <org.testng.version>7.10.1</org.testng.version>
         <mockito.testng.version>0.5.2</mockito.testng.version>
+        <maven.clean.plugin.version>3.1.0</maven.clean.plugin.version>
+        <maven.antrun.plugin.version>1.8</maven.antrun.plugin.version>
     </properties>
 </project>
