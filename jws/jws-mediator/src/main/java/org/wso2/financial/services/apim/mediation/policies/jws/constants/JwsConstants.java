@@ -24,13 +24,9 @@ package org.wso2.financial.services.apim.mediation.policies.jws.constants;
 public class JwsConstants {
 
     public static final String CONTENT_TYPE_TAG = "Content-Type";
-    public static final String CONTENT_LENGTH = "Content-Length";
     public static final String JWT_CONTENT_TYPE = "application/jwt";
-    public static final String JSON_CONTENT_TYPE = "application/json";
-    public static final String JOSE_CONTENT_TYPE = "application/jose";
     public static final String APPLICATION_XML_CONTENT_TYPE = "application/xml";
     public static final String TEXT_XML_CONTENT_TYPE = "text/xml";
-    public static final String CONSUMER_KEY = "api.ut.consumerKey";
     public static final String ISS_FORMAT = "^([a-zA-Z0-9]{0,})\\/([a-zA-Z0-9]{0,})$";
     public static final String APPLICATION_JSON = "application/json";
     public static final String JSON = "json";
