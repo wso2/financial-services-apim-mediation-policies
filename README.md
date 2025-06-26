@@ -12,7 +12,7 @@ There are mediation artifacts common for financial services use-cases and some a
 
 ### Building from the source
 
-If you want to build the Financial Services Accelerator from the source code:
+If you want to build the Financial Services APIM Mediation Policies from the source code:
 
 1. Install Java8 or above.
 2. Install [Apache Maven 3.0.5](https://maven.apache.org/download.cgi) or above.
