@@ -55,7 +55,7 @@ public class JwsResponseHeaderHandler extends AbstractSynapseHandler {
     private String xWso2ApiType;
 
     // TODO: get from config a strings like below
-    private String productionSigningCertAlias = "wso2carbon" /*null*/;
+    private String signingCertAlias = "wso2carbon" /*null*/;
     private String sandboxSigningCertAlias = "wso2carbon" /*null*/;
     private String signatureHeaderName = "x-jws-signature" /*null*/;
     private String signingKeyId = "1234" /*null*/;
@@ -262,12 +262,11 @@ public class JwsResponseHeaderHandler extends AbstractSynapseHandler {
         String jwsSignatureHeader = null;
         if (payloadString.isPresent() && StringUtils.isNotBlank(payloadString.get())) {
             HashMap<String, Object> criticalParameters = getCriticalHeaderParameters();
-            HashMap<JwsHandlerConstants.EnvironmentType, String> signingCertAliasMap = getSigningCertAliasMap();
 
             JWSAlgorithm signingAlgorithmObject = JWSAlgorithm.parse(signingAlgorithm);
             jwsSignatureHeader = JwsHandlerUtils
-                    .constructJWSSignature(payloadString.get(), criticalParameters, signingCertAliasMap,
-                            signingKeyId, signingAlgorithmObject);
+                    .constructJWSSignature(payloadString.get(), criticalParameters, signingKeyId,
+                            signingAlgorithmObject, signingCertAlias);
         } else {
             log.debug("Signature cannot be generated as the payload is invalid.");
         }
@@ -300,7 +299,7 @@ public class JwsResponseHeaderHandler extends AbstractSynapseHandler {
             try {
                 // Get signing certificate from keystore
                 X509Certificate signingCert;
-                signingCert = (X509Certificate) ServerIdentityRetriever.getCertificate(productionSigningCertAlias);
+                signingCert = (X509Certificate) ServerIdentityRetriever.getCertificate(signingCertAlias);
                 criticalParameters.put(JwsHandlerConstants.ISS_CLAIM_KEY, signingCert.getSubjectDN().getName());
             } catch (KeyStoreException e) {
                 log.error("Error occurred while retrieving signing certificate from keystore.", e);
@@ -373,15 +372,6 @@ public class JwsResponseHeaderHandler extends AbstractSynapseHandler {
         }
     }
 
-    public HashMap<JwsHandlerConstants.EnvironmentType, String> getSigningCertAliasMap() {
-
-        HashMap<JwsHandlerConstants.EnvironmentType, String> signingCertAliasMap = new HashMap<>();
-        signingCertAliasMap.put(JwsHandlerConstants.EnvironmentType.PRODUCTION, productionSigningCertAlias);
-        signingCertAliasMap.put(JwsHandlerConstants.EnvironmentType.SANDBOX, sandboxSigningCertAlias);
-
-        return signingCertAliasMap;
-    }
-
     public String getXWso2ApiType() {
 
         return xWso2ApiType;
@@ -392,14 +382,14 @@ public class JwsResponseHeaderHandler extends AbstractSynapseHandler {
         this.xWso2ApiType = xWso2ApiType;
     }
 
-    public String getProductionSigningCertAlias() {
+    public String getSigningCertAlias() {
 
-        return productionSigningCertAlias;
+        return signingCertAlias;
     }
 
-    public void setProductionSigningCertAlias(String productionSigningCertAlias) {
+    public void setSigningCertAlias(String signingCertAlias) {
 
-        this.productionSigningCertAlias = productionSigningCertAlias;
+        this.signingCertAlias = signingCertAlias;
     }
 
     public String getSandboxSigningCertAlias() {

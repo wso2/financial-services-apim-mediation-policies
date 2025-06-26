@@ -128,6 +128,7 @@ public class JwsHandlerUtils {
      * Build Message and extract payload.
      *
      * @param axis2MC message context
+     * @param headers transport headers
      * @return optional json message
      */
     public static Optional<String> buildMessagePayloadFromMessageContext(
@@ -192,15 +193,19 @@ public class JwsHandlerUtils {
     }
 
     /**
-     * Returns the JWS with a detached payload.
-     * @param payloadString response payload
-     * @param criticalParameters Critical parameters
-     * @return String Detached Jws Signature
-     * @throws JOSEException throws JOSEException Exception
+     * Constructs a JWS signature with a detached payload.
+     *
+     * @param payloadString the payload to be signed as a string
+     * @param criticalParameters a map of critical parameters to include in the JWS header
+     * @param signingKeyId the key ID for the signing key
+     * @param signingAlgorithm the JWS signing algorithm to use
+     * @param signingCertAlias the alias of the signing certificate in the keystore
+     * @return String representing the detached JWS signature
+     * @throws JOSEException if there is an error during JWS creation or signing
      */
     public static String constructJWSSignature(String payloadString, HashMap<String, Object> criticalParameters,
-                                               HashMap<JwsHandlerConstants.EnvironmentType, String> signingCertAliasMap,
-                                               String signingKeyId, JWSAlgorithm signingAlgorithm)
+                                               String signingKeyId, JWSAlgorithm signingAlgorithm,
+                                               String signingCertAlias)
             throws JOSEException {
 
         String detachedJWS;
@@ -208,7 +213,7 @@ public class JwsHandlerUtils {
         Optional<Key> signingKey;
 
         // Get signing certificate of ASPSP from keystore
-        signingKey = getSigningKey(signingCertAliasMap);
+        signingKey = ServerIdentityRetriever.getSigningKey(signingCertAlias);
 
         if (signingKey.isPresent()) {
             // Create a new JWSSigner
@@ -254,18 +259,6 @@ public class JwsHandlerUtils {
         } else {
             throw new SynapseException("Signing key is not present");
         }
-    }
-
-    /**
-     * Returns the signing key.
-     *
-     * @return Key Signing key
-     */
-    public static Optional<Key> getSigningKey(HashMap<JwsHandlerConstants.EnvironmentType, String>
-                                                      signingCertAliasMap) {
-
-        return ServerIdentityRetriever.getPrimaryCertificate(JwsHandlerConstants.CertificateType.SIGNING,
-                signingCertAliasMap);
     }
 
     /**

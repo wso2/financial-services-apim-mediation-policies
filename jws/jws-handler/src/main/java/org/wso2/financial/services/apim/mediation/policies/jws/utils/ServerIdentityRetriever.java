@@ -34,7 +34,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
-import java.util.HashMap;
 import java.util.Optional;
 
 /**
@@ -43,6 +42,7 @@ import java.util.Optional;
 public class ServerIdentityRetriever {
 
     private static KeyStore keyStore = null;
+
     // Internal KeyStore Password.
     private static char[] keyStorePassword;
 
@@ -86,76 +86,28 @@ public class ServerIdentityRetriever {
     }
 
     /**
-     * Returns the signing key using the signing Certificate.
-     * @param certificateType Signing certificate
-     * @param environmentType Sandbox or Production environment
-     * @return Key The signing key
+     * Returns the signing key based on the alias provided.
+     *
+     * @param alias Alias of the signing key to retrieve
+     * @return Optional<Key> The signing key as an Optional
      */
-    public static Optional<Key> getPrimaryCertificate(JwsHandlerConstants.CertificateType certificateType,
-                                                      JwsHandlerConstants.EnvironmentType environmentType,
-                                                      HashMap<JwsHandlerConstants.EnvironmentType, String>
-                                                              signingCertAliasMap) {
-        String certAlias;
+    public static Optional<Key> getSigningKey(String alias) {
 
-        if (certificateType.equals(JwsHandlerConstants.CertificateType.SIGNING)) {
-
-            certAlias = getCertAlias(certificateType, environmentType, signingCertAliasMap);
-
-            if (StringUtils.isNotBlank(certAlias)) {
-                try {
-                    // The requested key, or
-                    // null if the given alias does not exist or does not identify a key-related entry.
-                    return Optional.of(keyStore.getKey(certAlias, keyStorePassword));
-                } catch (KeyStoreException | NoSuchAlgorithmException | UnrecoverableKeyException e) {
-                    throw new SynapseException("Unable to retrieve certificate", e);
-                }
+        if (StringUtils.isNotBlank(alias)) {
+            try {
+                // The requested key, or
+                // null if the given alias does not exist or does not identify a key-related entry.
+                return Optional.of(keyStore.getKey(alias, keyStorePassword));
+            } catch (KeyStoreException | NoSuchAlgorithmException | UnrecoverableKeyException e) {
+                throw new SynapseException("Unable to retrieve certificate", e);
             }
-
         }
+
         return Optional.empty();
-    }
-
-    /**
-     * Returns signing key used at production environment.
-     * @param certificateType signing certificate
-     * @return Key signing key
-     */
-    public static Optional<Key> getPrimaryCertificate(JwsHandlerConstants.CertificateType certificateType,
-                                                      HashMap<JwsHandlerConstants.EnvironmentType, String>
-                                                              signingCertAliasMap) {
-
-        return getPrimaryCertificate(certificateType, JwsHandlerConstants.EnvironmentType.PRODUCTION,
-                signingCertAliasMap);
     }
 
     public static Certificate getCertificate(String alias) throws KeyStoreException {
 
         return keyStore.getCertificate(alias);
-    }
-
-    /**
-     * Returns Signing certificate alias.
-     * @param certificateType signing
-     * @param environmentType Production or Sandbox
-     * @param signingCertAliasMap Map containing environment type and signing certificate alias
-     * @return Signing certificate alias
-     */
-    public static String getCertAlias(JwsHandlerConstants.CertificateType certificateType,
-                                      JwsHandlerConstants.EnvironmentType environmentType,
-                                      HashMap<JwsHandlerConstants.EnvironmentType, String> signingCertAliasMap) {
-        String certAlias = null;
-
-        if (certificateType.equals(JwsHandlerConstants.CertificateType.SIGNING)) {
-            if (keyStore == null) {
-                throw new SynapseException("Internal Key Store not initialized");
-            }
-
-            if (environmentType == JwsHandlerConstants.EnvironmentType.SANDBOX) {
-                certAlias = signingCertAliasMap.get(JwsHandlerConstants.EnvironmentType.SANDBOX);
-            } else {
-                certAlias = signingCertAliasMap.get(JwsHandlerConstants.EnvironmentType.PRODUCTION);
-            }
-        }
-        return certAlias;
     }
 }
