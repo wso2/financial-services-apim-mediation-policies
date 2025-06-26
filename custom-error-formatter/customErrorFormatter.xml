@@ -27,16 +27,23 @@
         </then>
     </filter>
 
+    <!-- Setting error properties thrown from other failure sequences. -->
+    <filter xpath="$ctx:ERROR_CODE">
+        <then>
+            <property name="ERROR_CODE" expression="$ctx:ERROR_CODE"/>
+            <property name="ERROR_TITLE" expression="$ctx:ERROR_MESSAGE"/>
+            <property name="ERROR_DESCRIPTION" expression="$ctx:ERROR_DETAIL"/>
+        </then>
+    </filter>
+
     <!-- Setting schema validation specific error properties -->
     <filter source="$ctx:ERROR_DESCRIPTION" regex=".*Schema validation.*">
         <then>
-            <property name="ERROR_TITLE" value="Schema Validation Error"/>
 
             <!-- Setting accept header mismatch specific error properties -->
             <filter source="$ctx:ERROR_DESCRIPTION" regex=".*Accept header.*">
                 <then>
-                    <property name="ERROR_CODE" value="Unsupported Media Type"/>
-                    <property name="HTTP_SC" scope="axis2" type="STRING" value="415"/>
+                    <property name="HTTP_SC" scope="axis2" type="STRING" value="406"/>
                 </then>
             </filter>
         </then>
@@ -48,7 +55,7 @@
             <!-- Setting default error message when custom error description is not set -->
             <filter xpath="not($ctx:ERROR_DESCRIPTION)">
                 <then>
-                    <property name="ERROR_DESCRIPTION" expression="$ctx:ERROR_MESSAGE"/>
+                    <property name="ERROR_DESCRIPTION" value="Runtime Error"/>
                 </then>
             </filter>
 
