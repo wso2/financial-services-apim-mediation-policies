@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ ~ Copyright (c) 2025, WSO2 LLC. (https://www.wso2.com).
+ ~
+ ~ WSO2 LLC. licenses this file to you under the Apache License,
+ ~ Version 2.0 (the "License"); you may not use this file except
+ ~ in compliance with the License.
+ ~ You may obtain a copy of the License at
+ ~
+ ~     http://www.apache.org/licenses/LICENSE-2.0
+ ~
+ ~ Unless required by applicable law or agreed to in writing,
+ ~ software distributed under the License is distributed on an
+ ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ ~ KIND, either express or implied. See the License for the
+ ~ specific language governing permissions and limitations
+ ~ under the License.
+ -->
+<sequence xmlns="http://ws.apache.org/ns/synapse" name="customErrorFormatter">
+
+    <!-- Setting error properties thrown from threat fault sequence. Eg: Schema validation errors -->
+    <filter xpath="$ctx:THREAT_CODE">
+        <then>
+            <property name="ERROR_CODE" expression="$ctx:THREAT_CODE"/>
+            <property name="ERROR_TITLE" expression="$ctx:THREAT_MSG"/>
+            <property name="ERROR_DESCRIPTION" expression="$ctx:THREAT_DESC"/>
+        </then>
+    </filter>
+
+    <!-- Setting schema validation specific error properties -->
+    <filter source="$ctx:ERROR_DESCRIPTION" regex=".*Schema validation.*">
+        <then>
+            <property name="ERROR_TITLE" value="Schema Validation Error"/>
+
+            <!-- Setting accept header mismatch specific error properties -->
+            <filter source="$ctx:ERROR_DESCRIPTION" regex=".*Accept header.*">
+                <then>
+                    <property name="ERROR_CODE" value="Unsupported Media Type"/>
+                    <property name="HTTP_SC" scope="axis2" type="STRING" value="415"/>
+                </then>
+            </filter>
+        </then>
+    </filter>
+
+    <filter xpath="$ctx:ERROR_CODE">
+        <then>
+
+            <!-- Setting default error message when custom error description is not set -->
+            <filter xpath="not($ctx:ERROR_DESCRIPTION)">
+                <then>
+                    <property name="ERROR_DESCRIPTION" expression="$ctx:ERROR_MESSAGE"/>
+                </then>
+            </filter>
+
+            <!-- Setting default error title when custom error title is not set -->
+            <filter xpath="not($ctx:ERROR_TITLE)">
+                <then>
+                    <property name="ERROR_TITLE" value="Runtime Error"/>
+                </then>
+            </filter>
+
+            <!-- Error formatter based on set error properties -->
+            <payloadFactory media-type="json">
+                <format>
+                    {
+                        "error": {
+                            "code": "$1",
+                            "message": "$2",
+                            "description": "$3"
+                        }
+                    }
+                </format>
+                <args>
+                    <arg evaluator="xml" expression="$ctx:ERROR_CODE"/>
+                    <arg evaluator="xml" expression="$ctx:ERROR_TITLE"/>
+                    <arg evaluator="xml" expression="$ctx:ERROR_DESCRIPTION"/>
+                </args>
+            </payloadFactory>
+        </then>
+    </filter>
+</sequence>
