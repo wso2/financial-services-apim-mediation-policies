@@ -31,3 +31,8 @@ target
 
 # IDE specific configs
 .idea/
+
+# Generated files
+fs-apim-mediation-artifacts/custom-sequences
+fs-apim-mediation-artifacts/policy-j2-files
+fs-apim-mediation-artifacts/lib
