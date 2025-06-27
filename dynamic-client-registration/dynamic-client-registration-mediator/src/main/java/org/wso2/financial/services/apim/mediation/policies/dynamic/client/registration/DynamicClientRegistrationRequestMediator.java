@@ -70,7 +70,11 @@ public class DynamicClientRegistrationRequestMediator extends AbstractMediator {
         if (HttpMethod.GET.equals(httpMethod) || HttpMethod.PUT.equals(httpMethod) ||
                 HttpMethod.DELETE.equals(httpMethod)) {
             log.debug("Checking whether the token is bound to the correct client id");
-            return validateClientId(messageContext, headers);
+            boolean isValid =  validateClientId(messageContext, headers);
+            if (!isValid) {
+                log.error("Client ID validation failed. Returning error response.");
+                return false;
+            }
         }
 
         // Check if the HTTP method is POST or PUT to process DCR JWT validation and request alteration
