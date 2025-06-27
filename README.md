@@ -27,7 +27,16 @@ If you want to build the Financial Services APIM Mediation Policies from the sou
 | ```mvn install```                   | This starts building the repository without cleaning the folders.                                                                                                                                          |
 | ```mvn clean install```             | This cleans the folders and starts building the repository from scratch.  
 
+### How to use mediation artifacts 
+
 5. Once the maven build is successful, navigate to the 'fs-apim-mediation-artifacts/target' folder to get the zip file containing all the
-mediation policies,custom sequences, class mediators & handlers to copy in to /lib folder. 
+mediation policies,custom sequences and class mediators & handlers to copy in to WSO2 API Manager.
+
+6. Extract the zip 'fs-apim-mediation-artifacts-1.0.0.zip' and you will notice the following folder structure.
+      * Policy .j2 files - The mediation policy files which need to upload in API Publisher UI and engage to APIs. Below mediation policies are available in this repository.
+      * Custom sequences- Synapse based custom sequence files which need to copy in to {APIM_Home}/repository/deployment/synapse-cofngis/default/sequences
+      * lib - This folder contains the jars need to copy in to {APIM_Home}/repository/lib folder. It contains jars of the class mediator implementations refer from the policies and custom synapse handler implementations.
+        
+7. Follow the documentation in [here](https://ob.docs.wso2.com/en/latest/get-started/quick-start-guide/) on how to deplou financial services mediation artifacts in WSO2 API Manager and use in an Open Banking flow.
    
 
