@@ -18,9 +18,6 @@
 
 <!-- Remove unnecessary properties from the response -->
 <property name="HttpStatus" expression="get-property('axis2', 'HTTP_SC')"/>
-<log level="custom">
-    <property name="HTTP Status" expression="$ctx:HttpStatus"/>
-</log>
 <filter source="$ctx:HttpStatus" regex="^(200|201)$">
     <then>
         <enrich>
