@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.financial.services.apim.mediation.policies.jws.constants;
+package org.wso2.financial.services.apim.mediation.policies.handler.jws.constants;
 
 import java.time.ZoneId;
 
@@ -58,5 +58,13 @@ public class JwsHandlerConstants {
     public static final String ISS_CLAIM_KEY = "http://openbanking.org.uk/iss";
     public static final String TAN_CLAIM_KEY = "http://openbanking.org.uk/tan";
     public static final String B64_CLAIM_KEY = "b64";
+
+    // Property constants
+    public static final String JWS_SIGNING_CERT_ALIAS = "jwsSigningCertAlias";
+    public static final String JWS_HEADER_NAME = "jwSignatureHeaderName";
+    public static final String JWS_SIGNING_KEY_ID = "jwsSigningKeyId";
+    public static final String JWS_SIGNING_ORG_ID = "jwsSigningOrgId";
+    public static final String JWS_SIGNING_ALGORITHM = "jwsSigningAlgorithm";
+    public static final String RESPONSE_SIGNING_TRUST_ANCHOR = "responseSigningTrustAnchor";
 
 }

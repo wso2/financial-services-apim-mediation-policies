@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.financial.services.apim.mediation.policies.jws.utils;
+package org.wso2.financial.services.apim.mediation.policies.handler.jws.utils;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JOSEObjectType;
@@ -43,7 +43,7 @@ import org.apache.synapse.core.axis2.Axis2Sender;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
-import org.wso2.financial.services.apim.mediation.policies.jws.constants.JwsHandlerConstants;
+import org.wso2.financial.services.apim.mediation.policies.handler.jws.constants.JwsHandlerConstants;
 
 import java.io.IOException;
 import java.io.InputStream;

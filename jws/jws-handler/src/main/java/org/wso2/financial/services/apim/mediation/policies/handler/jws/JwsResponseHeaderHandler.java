@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.financial.services.apim.mediation.policies.jws;
+package org.wso2.financial.services.apim.mediation.policies.handler.jws;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -30,17 +30,14 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.wso2.financial.services.apim.mediation.policies.jws.constants.JwsHandlerConstants;
-import org.wso2.financial.services.apim.mediation.policies.jws.utils.JwsHandlerUtils;
-import org.wso2.financial.services.apim.mediation.policies.jws.utils.ServerIdentityRetriever;
+import org.wso2.financial.services.apim.mediation.policies.handler.jws.constants.JwsHandlerConstants;
+import org.wso2.financial.services.apim.mediation.policies.handler.jws.utils.JwsHandlerUtils;
+import org.wso2.financial.services.apim.mediation.policies.handler.jws.utils.ServerIdentityRetriever;
 
 import java.security.KeyStoreException;
 import java.security.cert.X509Certificate;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -52,14 +49,12 @@ public class JwsResponseHeaderHandler extends AbstractSynapseHandler {
 
     private static final Log log = LogFactory.getLog(JwsResponseHeaderHandler.class);
 
-    private String xWso2ApiType;
-
-    // TODO: get from config a strings like below
-    private String signingCertAlias = "wso2carbon" /*null*/;
-    private String sandboxSigningCertAlias = "wso2carbon" /*null*/;
-    private String signatureHeaderName = "x-jws-signature" /*null*/;
-    private String signingKeyId = "1234" /*null*/;
-    private String signingAlgorithm = "PS256" /*null*/;
+    private String jwsSigningCertAlias;
+    private String jwSignatureHeaderName;
+    private String jwsSigningKeyId;
+    private String jwsSigningOrgId;
+    private String jwsSigningAlgorithm;
+    private String responseSigningTrustAnchor;
 
     /**
      * Constructor for JwsResponseSignatureHandler.
@@ -103,6 +98,7 @@ public class JwsResponseHeaderHandler extends AbstractSynapseHandler {
     @Override
     public boolean handleResponseInFlow(MessageContext messageContext) {
 
+        setProperties(messageContext);
         return appendJwsSignatureToResponse(messageContext);
     }
 
@@ -115,16 +111,18 @@ public class JwsResponseHeaderHandler extends AbstractSynapseHandler {
     @Override
     public boolean handleResponseOutFlow(MessageContext messageContext) {
 
+        setProperties(messageContext);
         org.apache.axis2.context.MessageContext axis2MC =
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-        Map headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        Map<String, String> headers = (Map<String, String>)
+                axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         if (messageContext.getEnvelope() != null && messageContext.getEnvelope().getBody() != null &&
                 StringUtils.contains(messageContext.getEnvelope().getBody().toString(),
                         "Schema validation failed")) {
             // Add jws header for schema errors, This is due to schema validation happens after responseInFlow.
             // So we need to regenerate the jws for schema validation error responses.
             return appendJwsSignatureToResponse(messageContext);
-        } else if (headers.containsKey(signatureHeaderName) && headers.get(signatureHeaderName) != null) {
+        } else if (headers.containsKey(getJwSignatureHeaderName()) && headers.get(getJwSignatureHeaderName()) != null) {
             return true;
         } else {
             // Add jws header, if it's not added yet.
@@ -139,8 +137,6 @@ public class JwsResponseHeaderHandler extends AbstractSynapseHandler {
      * @return jws signature response is successfully appended.
      */
     private boolean appendJwsSignatureToResponse(MessageContext messageContext) {
-
-        setXWso2ApiType((String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT));
 
         try {
             boolean applicable = isApplicable(messageContext);
@@ -176,7 +172,7 @@ public class JwsResponseHeaderHandler extends AbstractSynapseHandler {
 
         if (payloadString.isPresent()) {
             try {
-                headers.put(signatureHeaderName, generateJWSSignature(payloadString));
+                headers.put(jwSignatureHeaderName, generateJWSSignature(payloadString));
             } catch (JOSEException | SynapseException e) {
                 log.error("Unable to sign response", e);
                 JwsHandlerUtils.returnSynapseHandlerJSONError(messageContext, JwsHandlerConstants.SERVER_ERROR_CODE,
@@ -200,18 +196,15 @@ public class JwsResponseHeaderHandler extends AbstractSynapseHandler {
      */
     public boolean isApplicable(MessageContext messageContext) {
 
+        if (StringUtils.isBlank((String) messageContext.getProperty(JwsHandlerConstants.JWS_HEADER_NAME))) {
+            return false;
+        }
+
         //Set content type for file upload get and payment file get
         if (isFilePaymentRetrieval(messageContext)) {
             setContentTypeForFileRetrieval(messageContext);
         }
-        // Get response signature required API resource list.
-        // TODO: get from config a string list like this (/open-banking/v3.1/pisp, /a/b/c)
-        List<String> requiredAPIs = new ArrayList<>(Arrays.asList("/open-banking/v3.1/pisp", "abc"));
 
-        if (!requiredAPIs.isEmpty() && requiredAPIs.stream()
-                .noneMatch(url -> org.apache.commons.lang.StringUtils.containsIgnoreCase(getXWso2ApiType(), url))) {
-            return false;
-        }
         return true;
     }
 
@@ -263,10 +256,10 @@ public class JwsResponseHeaderHandler extends AbstractSynapseHandler {
         if (payloadString.isPresent() && StringUtils.isNotBlank(payloadString.get())) {
             HashMap<String, Object> criticalParameters = getCriticalHeaderParameters();
 
-            JWSAlgorithm signingAlgorithmObject = JWSAlgorithm.parse(signingAlgorithm);
+            JWSAlgorithm signingAlgorithmObject = JWSAlgorithm.parse(getJwsSigningAlgorithm());
             jwsSignatureHeader = JwsHandlerUtils
-                    .constructJWSSignature(payloadString.get(), criticalParameters, signingKeyId,
-                            signingAlgorithmObject, signingCertAlias);
+                    .constructJWSSignature(payloadString.get(), criticalParameters, getJwsSigningKeyId(),
+                            signingAlgorithmObject, getJwsSigningCertAlias());
         } else {
             log.debug("Signature cannot be generated as the payload is invalid.");
         }
@@ -288,18 +281,14 @@ public class JwsResponseHeaderHandler extends AbstractSynapseHandler {
         criticalParameters.put(JwsHandlerConstants.IAT_CLAIM_KEY,
                 currentTime.toInstant().getEpochSecond());
 
-        // http://openbanking.org.uk/iss claim
-        // TODO: get from config a string like this (0015800001HQQrZAAX)
-        String signingOrgID = "0015800001HQQrZAAX";
-
-        if (org.apache.commons.lang.StringUtils.isNotEmpty(signingOrgID)) {
+        if (org.apache.commons.lang.StringUtils.isNotEmpty(getJwsSigningOrgId())) {
             // When issued by an ASPSP iss claim is of the form {{org-id}}
-            criticalParameters.put(JwsHandlerConstants.ISS_CLAIM_KEY, signingOrgID);
+            criticalParameters.put(JwsHandlerConstants.ISS_CLAIM_KEY, getJwsSigningOrgId());
         } else {
             try {
                 // Get signing certificate from keystore
                 X509Certificate signingCert;
-                signingCert = (X509Certificate) ServerIdentityRetriever.getCertificate(signingCertAlias);
+                signingCert = (X509Certificate) ServerIdentityRetriever.getCertificate(getJwsSigningCertAlias());
                 criticalParameters.put(JwsHandlerConstants.ISS_CLAIM_KEY, signingCert.getSubjectDN().getName());
             } catch (KeyStoreException e) {
                 log.error("Error occurred while retrieving signing certificate from keystore.", e);
@@ -307,8 +296,7 @@ public class JwsResponseHeaderHandler extends AbstractSynapseHandler {
         }
 
         // http://openbanking.org.uk/tan claim
-        // TODO: get from config a string like this (openbanking.org.uk)
-        criticalParameters.put(JwsHandlerConstants.TAN_CLAIM_KEY, "openbanking.org.uk");
+        criticalParameters.put(JwsHandlerConstants.TAN_CLAIM_KEY, getResponseSigningTrustAnchor());
 
         return criticalParameters;
     }
@@ -372,61 +360,62 @@ public class JwsResponseHeaderHandler extends AbstractSynapseHandler {
         }
     }
 
-    public String getXWso2ApiType() {
+    private void setProperties(MessageContext messageContext) {
 
-        return xWso2ApiType;
+        setJwsSigningCertAlias((String) messageContext.getProperty(JwsHandlerConstants.JWS_SIGNING_CERT_ALIAS));
+        setJwSignatureHeaderName((String) messageContext.getProperty(JwsHandlerConstants.JWS_HEADER_NAME));
+        setJwsSigningKeyId((String) messageContext.getProperty(JwsHandlerConstants.JWS_SIGNING_KEY_ID));
+        setJwsSigningOrgId((String) messageContext.getProperty(JwsHandlerConstants.JWS_SIGNING_ORG_ID));
+        setJwsSigningAlgorithm((String) messageContext.getProperty(JwsHandlerConstants.JWS_SIGNING_ALGORITHM));
+        setResponseSigningTrustAnchor((String) messageContext.getProperty(JwsHandlerConstants
+                .RESPONSE_SIGNING_TRUST_ANCHOR));
     }
 
-    public void setXWso2ApiType(String xWso2ApiType) {
-
-        this.xWso2ApiType = xWso2ApiType;
+    public String getJwsSigningCertAlias() {
+        return jwsSigningCertAlias;
     }
 
-    public String getSigningCertAlias() {
-
-        return signingCertAlias;
+    public void setJwsSigningCertAlias(String jwsSigningCertAlias) {
+        this.jwsSigningCertAlias = jwsSigningCertAlias;
     }
 
-    public void setSigningCertAlias(String signingCertAlias) {
-
-        this.signingCertAlias = signingCertAlias;
+    public String getJwSignatureHeaderName() {
+        return jwSignatureHeaderName;
     }
 
-    public String getSandboxSigningCertAlias() {
-
-        return sandboxSigningCertAlias;
+    public void setJwSignatureHeaderName(String jwSignatureHeaderName) {
+        this.jwSignatureHeaderName = jwSignatureHeaderName;
     }
 
-    public void setSandboxSigningCertAlias(String sandboxSigningCertAlias) {
-
-        this.sandboxSigningCertAlias = sandboxSigningCertAlias;
+    public String getJwsSigningKeyId() {
+        return jwsSigningKeyId;
     }
 
-    public String getSignatureHeaderName() {
-
-        return signatureHeaderName;
+    public void setJwsSigningKeyId(String jwsSigningKeyId) {
+        this.jwsSigningKeyId = jwsSigningKeyId;
     }
 
-    public void setSignatureHeaderName(String signatureHeaderName) {
-
-        this.signatureHeaderName = signatureHeaderName;
+    public String getJwsSigningOrgId() {
+        return jwsSigningOrgId;
     }
 
-    public String getSigningKeyId() {
-
-        return signingKeyId;
+    public void setJwsSigningOrgId(String jwsSigningOrgId) {
+        this.jwsSigningOrgId = jwsSigningOrgId;
     }
 
-    public void setSigningKeyId(String signingKeyId) {
-
-        this.signingKeyId = signingKeyId;
+    public String getJwsSigningAlgorithm() {
+        return jwsSigningAlgorithm;
     }
 
-    public String getSigningAlgorithm() {
-        return signingAlgorithm;
+    public void setJwsSigningAlgorithm(String jwsSigningAlgorithm) {
+        this.jwsSigningAlgorithm = jwsSigningAlgorithm;
     }
 
-    public void setSigningAlgorithm(String signingAlgorithm) {
-        this.signingAlgorithm = signingAlgorithm;
+    public String getResponseSigningTrustAnchor() {
+        return responseSigningTrustAnchor;
+    }
+
+    public void setResponseSigningTrustAnchor(String responseSigningTrustAnchor) {
+        this.responseSigningTrustAnchor = responseSigningTrustAnchor;
     }
 }

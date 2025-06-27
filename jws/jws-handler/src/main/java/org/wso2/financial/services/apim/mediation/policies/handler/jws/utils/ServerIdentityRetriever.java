@@ -16,14 +16,14 @@
  * under the License.
  */
 
-package org.wso2.financial.services.apim.mediation.policies.jws.utils;
+package org.wso2.financial.services.apim.mediation.policies.handler.jws.utils;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.SynapseException;
 import org.wso2.carbon.base.ServerConfiguration;
-import org.wso2.financial.services.apim.mediation.policies.jws.constants.JwsHandlerConstants;
+import org.wso2.financial.services.apim.mediation.policies.handler.jws.constants.JwsHandlerConstants;
 
 import java.io.FileInputStream;
 import java.io.IOException;

@@ -58,6 +58,16 @@
 
 <class name="org.wso2.financial.services.apim.mediation.policies.jws.JwsRequestHeaderValidationMediator">
     <property name="jwSignatureHeaderName" value="{{jwSignatureHeaderName}}"/>
-    <property name="validTrustAnchor" value="{{validTrustAnchor}}"/>
+    <property name="requestValidationTrustAnchor" value="{{requestValidationTrustAnchor}}"/>
     <property name="jwsSupportedAlgorithms" value="{{jwsSupportedAlgorithms}}"/>
 </class>
+
+<!-- Configurations required for JWS response header generation -->
+<property name="jwSignatureHeaderName" value="{{jwSignatureHeaderName}}"/>
+<property name="requestValidationTrustAnchor" value="{{requestValidationTrustAnchor}}"/>
+<property name="jwsSupportedAlgorithms" value="{{jwsSupportedAlgorithms}}"/>
+<property name="jwsSigningCertAlias" value="{{jwsSigningCertAlias}}"/>
+<property name="jwsSigningKeyId" value="{{jwsSigningKeyId}}"/>
+<property name="jwsSigningOrgId" value="{{jwsSigningOrgId}}"/>
+<property name="jwsSigningAlgorithm" value="{{jwsSigningAlgorithm}}"/>
+<property name="responseSigningTrustAnchor" value="{{responseSigningTrustAnchor}}"/>

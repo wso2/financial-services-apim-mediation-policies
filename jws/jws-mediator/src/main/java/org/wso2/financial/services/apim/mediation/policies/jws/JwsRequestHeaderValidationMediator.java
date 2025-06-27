@@ -71,7 +71,7 @@ public class JwsRequestHeaderValidationMediator extends AbstractMediator {
     private static final Log log = LogFactory.getLog(JwsRequestHeaderValidationMediator.class);
 
     private String jwSignatureHeaderName;
-    private String validTrustAnchor = null;
+    private String requestValidationTrustAnchor = null;
     private String jwsSupportedAlgorithms = null;
 
     /**
@@ -343,7 +343,7 @@ public class JwsRequestHeaderValidationMediator extends AbstractMediator {
         boolean tanValid = false;
 
         if (StringUtils.isNotEmpty(tanClaim)) {
-            tanValid = validTrustAnchor.equals(tanClaim);
+            tanValid = requestValidationTrustAnchor.equals(tanClaim);
 
             if (!tanValid) {
                 throw new SynapseException("Error occurred due to invalid tan claim");
@@ -574,12 +574,12 @@ public class JwsRequestHeaderValidationMediator extends AbstractMediator {
         throw new IllegalArgumentException("Public key with kid=" + kid + " not found in JWKS");
     }
 
-    public String getValidTrustAnchor() {
-        return validTrustAnchor;
+    public String getRequestValidationTrustAnchor() {
+        return requestValidationTrustAnchor;
     }
 
-    public void setValidTrustAnchor(String validTrustAnchor) {
-        this.validTrustAnchor = validTrustAnchor;
+    public void setRequestValidationTrustAnchor(String requestValidationTrustAnchor) {
+        this.requestValidationTrustAnchor = requestValidationTrustAnchor;
     }
 
     public String getJwSignatureHeaderName() {
