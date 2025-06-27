@@ -32,6 +32,7 @@ public class JwsHandlerConstants {
     public static final String TEXT_XML_CONTENT_TYPE = "text/xml";
     public static final String APPLICATION_OCTET_STREAM_TYPE = "application/octet-stream";
     public static final String GET_HTTP_METHOD = "GET";
+    public static final String REST_FULL_REQUEST_PATH = "REST_FULL_REQUEST_PATH";
     public static final String HTTP_METHOD = "api.ut.HTTP_METHOD";
     public static final String API_ELECTED_RESOURCE = "API_ELECTED_RESOURCE";
     public static final String KEYSTORE_LOCATION_CONF_KEY = "Security.KeyStore.Location";

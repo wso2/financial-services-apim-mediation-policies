@@ -67,7 +67,7 @@ public class JwsHandlerUtils {
     private static final Log log = LogFactory.getLog(JwsHandlerUtils.class);
 
     /**
-     * Return JSON ResponseError for SynapseHandler.
+     * Return JSON Error for SynapseHandler.
      *
      * @param messageContext messages context.
      * @param code           response code.
@@ -81,7 +81,7 @@ public class JwsHandlerUtils {
         try {
             RelayUtils.discardRequestMessage(axis2MC);
         } catch (AxisFault axisFault) {
-            log.error("ResponseError occurred while discarding the message", axisFault);
+            log.error("Error occurred while discarding the message", axisFault);
         }
         setJsonFaultPayloadToMessageContext(messageContext, jsonPayload);
         sendSynapseHandlerFaultResponse(messageContext, code);
@@ -227,10 +227,10 @@ public class JwsHandlerUtils {
             JWSHeader jwsHeader = constructJWSHeader(signingKeyId, criticalParameters, signingAlgorithm);
             JWSObject jwsObject = constructJWSObject(jwsHeader, payloadString);
 
-            if (privateKey.getAlgorithm().equals("RSA")) {
+            if ("RSA".equals(privateKey.getAlgorithm())) {
                 // If the signing key is an RSA Key
                 signer = new RSASSASigner((PrivateKey) privateKey);
-            } else if (privateKey.getAlgorithm().equals("EC")) {
+            } else if ("EC".equals(privateKey.getAlgorithm())) {
                 // If the signing key is an EC Key
                 signer = new ECDSASigner((ECPrivateKey) privateKey);
             } else {

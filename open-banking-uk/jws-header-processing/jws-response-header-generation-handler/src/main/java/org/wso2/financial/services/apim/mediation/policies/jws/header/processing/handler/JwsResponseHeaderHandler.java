@@ -147,7 +147,7 @@ public class JwsResponseHeaderHandler extends AbstractSynapseHandler {
                 log.debug("Generating signature for the response");
             }
         } catch (RuntimeException e) {
-            log.debug("Internal Server Error, Unable to append jws signature", e);
+            log.error("Internal Server Error, Unable to append jws signature", e);
             JwsHandlerUtils.returnSynapseHandlerJSONError(messageContext, JwsHandlerConstants.SERVER_ERROR_CODE,
                     getFormattedSignatureHandlingErrorResponse(messageContext, JwsHandlerConstants.SERVER_ERROR_CODE,
                             JwsHandlerConstants.INTERNAL_SERVER_ERROR,
@@ -162,7 +162,16 @@ public class JwsResponseHeaderHandler extends AbstractSynapseHandler {
         try {
             payloadString = JwsHandlerUtils.buildMessagePayloadFromMessageContext(axis2MC, headers);
         } catch (SynapseException e) {
-            log.error("Unable to build response payload", e);
+            String restFullRequestPath = (String) messageContext
+                    .getProperty(JwsHandlerConstants.REST_FULL_REQUEST_PATH);
+            String httpMethod = (String) messageContext
+                    .getProperty(JwsHandlerConstants.HTTP_METHOD);
+
+            // For logging purposes
+            String pathWithMethod = restFullRequestPath + ":" + httpMethod;
+
+            String errorDescription = "Unable to build response payload";
+            log.error(errorDescription + ". for request: " + pathWithMethod);
             JwsHandlerUtils.returnSynapseHandlerJSONError(messageContext, JwsHandlerConstants.SERVER_ERROR_CODE,
                     getFormattedSignatureHandlingErrorResponse(messageContext, JwsHandlerConstants.SERVER_ERROR_CODE,
                             JwsHandlerConstants.INTERNAL_SERVER_ERROR,
@@ -261,7 +270,7 @@ public class JwsResponseHeaderHandler extends AbstractSynapseHandler {
                     .constructJWSSignature(payloadString.get(), criticalParameters, getJwsSigningKeyId(),
                             signingAlgorithmObject, getJwsSigningCertAlias());
         } else {
-            log.debug("Signature cannot be generated as the payload is invalid.");
+            log.debug("Signature cannot be generated as the payload is not present");
         }
         return jwsSignatureHeader;
     }

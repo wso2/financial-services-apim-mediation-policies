@@ -79,7 +79,7 @@ public class ServerIdentityRetriever {
             keyStore.load(inputStream, keyStorePassword.toCharArray());
             return keyStore;
         } catch (KeyStoreException e) {
-            throw new SynapseException("Error while retrieving aliases from keystore", e);
+            throw new SynapseException("Error while retrieving aliases from keystore: " + keyStoreLocation, e);
         } catch (IOException | CertificateException | NoSuchAlgorithmException e) {
             throw new SynapseException("Error while loading keystore", e);
         }
