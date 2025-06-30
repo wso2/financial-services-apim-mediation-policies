@@ -48,7 +48,7 @@
                                     <fileset
                                             dir="../common/consent-enforcement/consent-enforcement-payload-mediator/target">
                                         <filename
-                                                regex="consent-enforcement-mediator-\d+\.\d+\.\d+(?:-[A-Za-z0-9]+)*(?&lt;!-javadoc)\.jar"/>
+                                                regex="consent-enforcement-payload-mediator-\d+\.\d+\.\d+(?:-[A-Za-z0-9]+)*(?&lt;!-javadoc)\.jar"/>
                                     </fileset>
                                 </copy>
                                 <copy todir="${project.basedir}/lib" overwrite="true">
