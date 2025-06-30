@@ -23,7 +23,7 @@
         <groupId>org.wso2.financial.services.apim.mediation.policies</groupId>
         <artifactId>financial-services-apim-mediation-policies</artifactId>
         <version>1.0.0-SNAPSHOT</version>
-        <relativePath>../../pom.xml</relativePath>
+        <relativePath>../../../pom.xml</relativePath>
     </parent>
 
     <artifactId>jws-response-header-generation-handler</artifactId>
