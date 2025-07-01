@@ -18,6 +18,7 @@
 
 <!-- Storing the original request parameters for future reference -->
 <property name="originalRequestJsonBody" expression="json-eval($)" scope="default" type="STRING"/>
+<property name="originalAuthorizationTypeHeader" expression="$trp:Authorization"/>
 
 <!-- Setting URI property to retrieve the client ID from the API context -->
 <property name="uri.var.clientId" expression="$ctx:api.ut.consumerKey" type="STRING"/>
@@ -56,11 +57,8 @@
     </args>
 </payloadFactory>
 
-<class name="org.wso2.financial.services.apim.mediation.policies.jws.header.processing.JwsRequestHeaderValidationMediator">
-    <property name="jwSignatureHeaderName" value="{{jwSignatureHeaderName}}"/>
-    <property name="requestValidationTrustAnchor" value="{{requestValidationTrustAnchor}}"/>
-    <property name="jwsSupportedAlgorithms" value="{{jwsSupportedAlgorithms}}"/>
-</class>
+<!-- Setting the original Auth header back -->
+<header name="Authorization" expression="$ctx:originalAuthorizationTypeHeader" scope="transport"/>
 
 <!-- Configurations required for JWS response header generation -->
 <property name="jwSignatureHeaderName" value="{{jwSignatureHeaderName}}"/>
@@ -71,3 +69,9 @@
 <property name="jwsSigningOrgId" value="{{jwsSigningOrgId}}"/>
 <property name="jwsSigningAlgorithm" value="{{jwsSigningAlgorithm}}"/>
 <property name="responseSigningTrustAnchor" value="{{responseSigningTrustAnchor}}"/>
+
+<class name="org.wso2.financial.services.apim.mediation.policies.jws.header.processing.JwsRequestHeaderValidationMediator">
+    <property name="jwSignatureHeaderName" value="{{jwSignatureHeaderName}}"/>
+    <property name="requestValidationTrustAnchor" value="{{requestValidationTrustAnchor}}"/>
+    <property name="jwsSupportedAlgorithms" value="{{jwsSupportedAlgorithms}}"/>
+</class>

@@ -40,6 +40,7 @@ import org.wso2.financial.services.apim.mediation.policies.jws.header.processing
 import org.wso2.financial.services.apim.mediation.policies.jws.header.processing.utils.JwsUtils;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
@@ -560,7 +561,14 @@ public class JwsRequestHeaderValidationMediator extends AbstractMediator {
     protected PublicKey getPublicKeyFromJWKS(String jwksUrl, String kid)
             throws IOException, ParseException, JOSEException {
 
-        URL jwksEndpoint = new URL(jwksUrl);
+        URL jwksEndpoint;
+        try {
+            jwksEndpoint = new URL(jwksUrl);
+        } catch (MalformedURLException e) {
+            log.error("Provided JWKS URL is malformed", e);
+            throw new SynapseException("The provided JWKS_URI is malformed", e);
+        }
+
         JWKSet jwkSet = JWKSet.load(jwksEndpoint);
 
         matchingJWK = jwkSet.getKeyByKeyId(kid);
@@ -571,7 +579,8 @@ public class JwsRequestHeaderValidationMediator extends AbstractMediator {
             return ((ECKey) matchingJWK).toECPublicKey();
         }
 
-        throw new IllegalArgumentException("Public key with kid=" + kid + " not found in JWKS");
+        log.error("Public key with kid=" + kid + " not found in JWKS");
+        throw new SynapseException("kid does not resolve to a valid signing certificate");
     }
 
     public String getRequestValidationTrustAnchor() {
