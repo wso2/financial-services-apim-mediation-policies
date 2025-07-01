@@ -19,7 +19,7 @@
 <!-- Storing the original request parameters for future reference -->
 <property name="originalRequestJsonBody" expression="json-eval($)" scope="default" type="STRING"/>
 <property name="originalRequestBody" expression="$body"/>
-<property name="originalAuthorizationTypeHeader" expression="$trp:Authorization"/>
+<property name="originalAuthorizationHeader" expression="$trp:Authorization"/>
 <property name="originalContentTypeHeader" expression="$trp:Content-Type"/>
 <property name="originalAcceptHeader" expression="$trp:Accept"/>
 
@@ -54,7 +54,7 @@
     </endpoint>
 </call>
 
-<header name="Authorization" scope="transport" expression="$ctx:originalAuthorizationTypeHeader"/>
+<header name="Authorization" scope="transport" expression="$ctx:originalAuthorizationHeader"/>
 <header name="Content-Type" scope="transport" expression="$ctx:originalContentTypeHeader"/>
 <header name="Accept" scope="transport" expression="$ctx:originalAcceptHeader"/>
 
