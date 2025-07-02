@@ -98,8 +98,7 @@ public class JwsResponseHeaderHandler extends AbstractSynapseHandler {
     @Override
     public boolean handleResponseInFlow(MessageContext messageContext) {
 
-        setProperties(messageContext);
-        return appendJwsSignatureToResponse(messageContext);
+        return true;
     }
 
     /**
@@ -112,22 +111,14 @@ public class JwsResponseHeaderHandler extends AbstractSynapseHandler {
     public boolean handleResponseOutFlow(MessageContext messageContext) {
 
         setProperties(messageContext);
-        org.apache.axis2.context.MessageContext axis2MC =
-                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-        Map<String, String> headers = (Map<String, String>)
-                axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-        if (messageContext.getEnvelope() != null && messageContext.getEnvelope().getBody() != null &&
-                StringUtils.contains(messageContext.getEnvelope().getBody().toString(),
-                        "Schema validation failed")) {
-            // Add jws header for schema errors, This is due to schema validation happens after responseInFlow.
-            // So we need to regenerate the jws for schema validation error responses.
-            return appendJwsSignatureToResponse(messageContext);
-        } else if (headers.containsKey(getJwSignatureHeaderName()) && headers.get(getJwSignatureHeaderName()) != null) {
+
+        // Returning when the header name property is not sent, implicitly indicating that the
+        // JWS signature is not required
+        if (StringUtils.isBlank(getJwSignatureHeaderName())) {
             return true;
-        } else {
-            // Add jws header, if it's not added yet.
-            return appendJwsSignatureToResponse(messageContext);
         }
+
+        return appendJwsSignatureToResponse(messageContext);
     }
 
     /**
