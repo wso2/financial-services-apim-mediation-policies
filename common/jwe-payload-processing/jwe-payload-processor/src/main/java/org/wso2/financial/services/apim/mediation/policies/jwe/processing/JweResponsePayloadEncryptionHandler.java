@@ -81,7 +81,8 @@ public class JweResponsePayloadEncryptionHandler extends AbstractSynapseHandler 
 
     /**
      * Method to encrypt the response payload using JWE and set the encrypted payload back to the message context.
-     *This method will only proceed with the encryption if the response code is 200 or 201.
+     * This method will only proceed with the encryption if the response code is 200 or 201. In the encryption, it
+     * will use the public key of the JWKS URL provided when registering the application.
      * <p>
      * This implementation supports only "RSA-OAEP-256", "RSA-OAEP", "RSA-OAEP-384", "RSA-OAEP-512" and "RSA1_5" as
      * encryption algorithms and "A128GCM", "A256GCM" and "A192GCM" as encryption methods.
