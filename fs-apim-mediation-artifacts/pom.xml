@@ -79,6 +79,13 @@
                                                 regex="jws-response-header-generation-handler-\d+\.\d+\.\d+(?:-[A-Za-z0-9]+)*(?&lt;!-javadoc)\.jar"/>
                                     </fileset>
                                 </copy>
+                                <copy todir="${project.basedir}/lib" overwrite="true">
+                                    <fileset
+                                            dir="../common/jwe-payload-processing/jwe-payload-processor/target">
+                                        <filename
+                                                regex="jwe-payload-processor-\d+\.\d+\.\d+(?:-[A-Za-z0-9]+)*(?&lt;!-javadoc)\.jar"/>
+                                    </fileset>
+                                </copy>
                                 <!-- Copying j2 files to folder -->
                                 <copy todir="${project.basedir}/policy-j2-files" overwrite="true">
                                     <fileset
@@ -110,6 +117,13 @@
                                     <fileset
                                             dir="../open-banking-uk/jws-header-processing">
                                         <filename name="jwsHeaderProcessingPolicy.j2"/>
+                                    </fileset>
+                                </copy>
+                                <copy todir="${project.basedir}/policy-j2-files" overwrite="true">
+                                    <fileset
+                                            dir="../common/jwe-payload-processing">
+                                        <filename
+                                                name="consentEnforcementPolicy.j2"/>
                                     </fileset>
                                 </copy>
                                 <!-- Copying j2 files to folder -->
