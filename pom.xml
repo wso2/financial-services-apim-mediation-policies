@@ -42,6 +42,7 @@
         <module>common/consent-enforcement/consent-enforcement-payload-mediator</module>
         <module>common/mtls-enforcement/mtls-header-enforcement-mediator</module>
         <module>common/dynamic-client-registration/dynamic-client-registration-mediator</module>
+        <module>common/jwe-payload-processing/jwe-payload-processor</module>
         <module>open-banking-uk/jws-header-processing/jws-request-header-validation-mediator</module>
         <module>open-banking-uk/jws-header-processing/jws-response-header-generation-handler</module>
         <module>fs-apim-mediation-artifacts</module>
@@ -289,7 +290,7 @@
         <org.wso2.orbit.nimbus.version>9.37.3.wso2v1</org.wso2.orbit.nimbus.version>
         <!--Base Products related dependencies-->
         <carbon.kernel.version>4.6.0</carbon.kernel.version>
-        <synapse.version>2.1.7-wso2v217</synapse.version>
+        <synapse.version>4.0.0-wso2v20</synapse.version>
         <org.wso2.carbon.apimgt.version>9.30.10</org.wso2.carbon.apimgt.version>
         <commons-codec.version>1.16.0</commons-codec.version>
         <org.wso2.orbit.nimbus.version>9.37.3.wso2v1</org.wso2.orbit.nimbus.version>
