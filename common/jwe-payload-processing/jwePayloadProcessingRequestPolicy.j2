@@ -19,8 +19,11 @@
 <!-- Configurations required for JWE Response Encryption -->
 <property name="jweEncryptionAlg" value="{{jweEncryptionAlg}}"/>
 <property name="jweEncryptionMethod" value="{{jweEncryptionMethod}}"/>
+<property name="jweEncryptionCertAlias" value="{{jweEncryptionCertAlias}}"/>
 
-<class name="org.wso2.financial.services.apim.mediation.policies.jwe.processing.JwePayloadDecryptionMediator"/>
+<class name="org.wso2.financial.services.apim.mediation.policies.jwe.processing.JwePayloadDecryptionMediator">
+    <property name="jweEncryptionCertAlias" value="{{jweEncryptionCertAlias}}"/>
+</class>
 
 <!-- Storing the original request parameters for future reference -->
 <property name="originalRequestJsonBody" expression="json-eval($)" scope="default" type="STRING"/>

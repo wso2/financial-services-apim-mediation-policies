@@ -45,6 +45,7 @@ import java.util.Optional;
 public class JwePayloadDecryptionMediator extends AbstractMediator {
 
     private static final Log log = LogFactory.getLog(JwePayloadDecryptionMediator.class);
+    private String jweEncryptionCertAlias = null;
 
     /**
      * Method to decrypt the JWE encrypted payload in the request and set the decrypted payload back to the message.
@@ -93,7 +94,7 @@ public class JwePayloadDecryptionMediator extends AbstractMediator {
             }
 
             // Get the private key of the server certificates from the keystore to decrypt the payload
-            Key privateKey = ServerKeystoreRetriever.getInstance().getSigningKey("wso2carbon");
+            Key privateKey = ServerKeystoreRetriever.getInstance().getSigningKey(getJweEncryptionCertAlias());
             if (privateKey == null) {
                 log.error("Private key not found in the keystore. Hence, cannot proceed with payload decryption.");
                 throw new SynapseException("Error occurred while payload decryption.");
@@ -122,5 +123,13 @@ public class JwePayloadDecryptionMediator extends AbstractMediator {
             throw new SynapseException("Error while parsing/decrypting the JWE token", e);
         }
         return true;
+    }
+
+    public void setJweEncryptionCertAlias(String jweEncryptionCertAlias) {
+        this.jweEncryptionCertAlias = jweEncryptionCertAlias;
+    }
+
+    public String getJweEncryptionCertAlias() {
+        return jweEncryptionCertAlias;
     }
 }

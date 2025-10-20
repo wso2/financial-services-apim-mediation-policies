@@ -76,7 +76,6 @@
                         <exclude>**/*Constants.class</exclude>
                         <exclude>**/*Exception.class</exclude>
                         <exclude>**/*ServerKeystoreRetriever.class</exclude>
-                        <exclude>**/*JwkUtils.class</exclude>
                     </excludes>
                 </configuration>
                 <executions>

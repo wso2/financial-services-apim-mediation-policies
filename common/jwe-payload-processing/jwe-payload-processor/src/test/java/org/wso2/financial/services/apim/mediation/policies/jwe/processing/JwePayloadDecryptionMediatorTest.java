@@ -63,6 +63,8 @@ public class JwePayloadDecryptionMediatorTest {
     @BeforeClass
     public void setup() {
         mediator = new JwePayloadDecryptionMediator();
+        mediator.setJweEncryptionCertAlias("wso2carbon");
+
         synapseCtx = mock(MessageContext.class);
         axis2Ctx = mock(Axis2MessageContext.class);
         axis2Ctx.setProperty(PassThroughConstants.MESSAGE_BUILDER_INVOKED, true);
@@ -187,14 +189,6 @@ public class JwePayloadDecryptionMediatorTest {
                         "wso2carbon", "wso2carbon"));
         serverKeystoreRetrieverMockedStatic.when(ServerKeystoreRetriever::getInstance)
                 .thenReturn(serverKeystoreRetriever);
-//        jweUtilsMockedStatic.when(() -> JwePayloadProcessingUtils.getContentType(anyMap()))
-//                .thenReturn("application/jose+jwe");
-//        jweUtilsMockedStatic.when(() -> JwePayloadProcessingUtils.isSupportedContentType(anyString()))
-//                .thenReturn(true);
-//        jweUtilsMockedStatic.when(() -> JwePayloadProcessingUtils.buildMessagePayloadFromMessageContext(any(),
-//                        anyString())).thenReturn(Optional.of(encryptedPayload));
-//        jweUtilsMockedStatic.when(() -> JwePayloadProcessingUtils.setDecryptedPayloadToMessageContext(any(), any(),
-//                anyMap())).thenAnswer(invocation -> null);
 
         OMElement omElement = mock(OMElement.class);
         doReturn(encryptedPayload).when(omElement).getText();

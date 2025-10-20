@@ -21,7 +21,8 @@
     <test name="JWE Processor Test" parallel="tests" enabled="true" group-by-instances="true">
         <classes>
             <class name="org.wso2.financial.services.apim.mediation.policies.jwe.processing.JwePayloadDecryptionMediatorTest"/>
-                        <class name="org.wso2.financial.services.apim.mediation.policies.jwe.processing.JweResponsePayloadEncryptionHandlerTest"/>
+            <class name="org.wso2.financial.services.apim.mediation.policies.jwe.processing.JweResponsePayloadEncryptionHandlerTest"/>
+            <class name="org.wso2.financial.services.apim.mediation.policies.jwe.processing.JwkUtilsTest"/>
         </classes>
     </test>
 </suite>

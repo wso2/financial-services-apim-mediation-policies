@@ -132,14 +132,14 @@ public class JwkUtils {
      * @return  Public certificate
      * @throws JwePayloadProcessingException  When failed to retrieve the certificate
      */
-    private static X509Certificate getPublicCertFromJWK(JWK jwk) throws JwePayloadProcessingException {
+    public static X509Certificate getPublicCertFromJWK(JWK jwk) throws JwePayloadProcessingException {
 
-        if (log.isDebugEnabled()) {
-            log.debug(String.format("Attempting to retrieve public certificate from the Jwk kid: %s ."
-                    , jwk.getKeyID()));
-        }
         X509Certificate certificate;
         if (jwk != null && jwk.getParsedX509CertChain() != null) {
+            if (log.isDebugEnabled()) {
+                log.debug(String.format("Attempting to retrieve public certificate from the Jwk kid: %s ."
+                        , jwk.getKeyID()));
+            }
             certificate = jwk.getParsedX509CertChain().get(0);
             if (log.isDebugEnabled()) {
                 log.debug(String.format("Retrieved the public signing certificate successfully from the " +

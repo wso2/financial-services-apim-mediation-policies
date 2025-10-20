@@ -12,6 +12,7 @@ import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mockito.MockedStatic;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -127,5 +128,12 @@ public class JweResponsePayloadEncryptionHandlerTest {
         boolean result = handler.handleResponseOutFlow(axis2Ctx);
 
         assertTrue(result, "Handler should successfully encrypt the payload.");
+    }
+
+    @Test
+    public void testHandlerMethods() {
+        Assert.assertTrue(handler.handleRequestInFlow(axis2Ctx));
+        Assert.assertTrue(handler.handleRequestOutFlow(axis2Ctx));
+        Assert.assertTrue(handler.handleResponseInFlow(axis2Ctx));
     }
 }
